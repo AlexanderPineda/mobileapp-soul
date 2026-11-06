@@ -6,15 +6,13 @@ import { StaffProfile } from '../types';
 import { TherapistCard } from '../components/therapists/TherapistCard';
 import { EmptyState } from '../components/common/EmptyState';
 import { colors, spacing, typography } from '../styles/theme';
+import type { ScreenProps } from '../navigation/types';
 
 export function TherapistListScreen({
   route,
   navigation,
-}: {
-  route: any;
-  navigation: any;
-}) {
-  const { centerId } = route.params as { centerId: string };
+}: ScreenProps<'TherapistList'>) {
+  const { centerId } = route.params;
 
   const [therapists, setTherapists] = useState<StaffProfile[]>([]);
   const [loading, setLoading] = useState(true);

@@ -9,16 +9,12 @@ import { SlotItem } from '../components/availability/SlotItem';
 import { EmptyState } from '../components/common/EmptyState';
 import { colors, spacing, typography } from '../styles/theme';
 import { formatDate, toISODate } from '../utils/format';
+import type { ScreenProps } from '../navigation/types';
 
 export function AvailabilityScreen({
   route,
   navigation,
-}: {
-  route: {
-    params: RootStackAvailabilityParams;
-  };
-  navigation: any;
-}) {
+}: ScreenProps<'Availability'>) {
   const { centerId, staffProfileId: preselectedStaffProfileId } = route.params;
 
   const [date, setDate] = useState<string>(() => toISODate(new Date()));
@@ -181,8 +177,3 @@ const styles = StyleSheet.create({
 });
 
 export default AvailabilityScreen;
-
-type RootStackAvailabilityParams = {
-  centerId: string;
-  staffProfileId?: string;
-};

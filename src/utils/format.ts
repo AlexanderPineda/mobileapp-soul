@@ -67,6 +67,22 @@ export function formatHour(hour: string): string {
   return `${displayHour}:${m} ${period}`;
 }
 
+/**
+ * Formatea la fecha del slot (YYYY-MM-DD) como texto legible.
+ * Se construye a partir de las partes UTC para evitar desfases de zona horaria.
+ */
+export function formatLongDate(isoDate: string, locale = 'es-CO'): string {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.toLocaleDateString(locale, {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
 export function formatDate(date: Date, locale = 'es-CO'): string {
   return date.toLocaleDateString(locale, {
     weekday: 'short',

@@ -5,47 +5,12 @@ import { api } from '../api/apiClient';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { colors, spacing, typography } from '../styles/theme';
-import { buildISODateTime, formatHour } from '../utils/format';
+import { buildISODateTime, formatHour, formatLongDate } from '../utils/format';
 import { SERVER_TIME_ZONE_OFFSET_MINUTES } from '../config';
+import type { PublicAppointment } from '../types';
+import type { ScreenProps } from '../navigation/types';
 
-/**
- * Formatea la fecha del slot (YYYY-MM-DD) como texto legible.
- * Se construye a partir de las partes UTC para evitar desfases de zona horaria.
- */
-function formatBookingDate(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.toLocaleDateString('es-CO', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-}
-
-export function BookingScreen({
-  route,
-  navigation,
-}: {
-  route: {
-    params: {
-      centerId: string;
-      modality: 'VIRTUAL' | 'PRESENCIAL';
-      date: string;
-      duration: number;
-      time: string;
-      staffProfileId?: string;
-      serviceType: string;
-      serviceLabel: string;
-      patientName: string;
-      patientLastName: string;
-      patientEmail: string;
-      patientPhone?: string;
-    };
-  };
-  navigation: any;
-}) {
+export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const {
     centerId,
     modality,
@@ -98,30 +63,29 @@ export function BookingScreen({
     setError(null);
 
     try {
-      await api.post('/public/appointments', {
-        patientFirstName: firstName.trim(),
-        patientLastName: lastName.trim(),
-        patientEmail: email.trim(),
-        patientPhone: phone.trim() || undefined,
-        serviceType,
-        centerId,
-        staffProfileId: staffProfileId || undefined,
-        startTime: startISO,
-        endTime: endAsDate.toISOString(),
-        durationMinutes: duration,
-        isVirtual: modality === 'VIRTUAL',
-      });
-
-      navigation.navigate('Confirmation', {
-        appointment: {
+      const appointment = await api.post<PublicAppointment>(
+        '/public/appointments',
+        {
+          patientFirstName: firstName.trim(),
+          patientLastName: lastName.trim(),
+          patientEmail: email.trim(),
+          patientPhone: phone.trim() || undefined,
+          serviceType,
+          centerId,
+          staffProfileId: staffProfileId || undefined,
           startTime: startISO,
           endTime: endAsDate.toISOString(),
-          title: serviceLabel,
+          durationMinutes: duration,
           isVirtual: modality === 'VIRTUAL',
         },
-        patientName: firstName.trim(),
-        patientLastName: lastName.trim(),
-        patientEmail: email.trim(),
+      );
+
+      // `replace` saca la pantalla del formulario del stack: si el paciente
+      // vuelve atrás desde la confirmación no puede reenviar la reserva.
+      navigation.replace('Confirmation', {
+        appointment,
+        date,
+        time,
         patientPhone: phone.trim() || undefined,
       });
     } catch (err: unknown) {
@@ -151,7 +115,7 @@ export function BookingScreen({
         </Text>
         <Text style={styles.summaryLabel}>Fecha y hora</Text>
         <Text style={styles.summaryValue}>
-          {formatBookingDate(date)} a las {formatHour(time)}
+          {formatLongDate(date)} a las {formatHour(time)}
         </Text>
       </View>
 

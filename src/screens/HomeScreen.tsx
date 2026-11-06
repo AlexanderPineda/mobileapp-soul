@@ -6,12 +6,9 @@ import { Center } from '../types';
 import { CenterCard } from '../components/centers/CenterCard';
 import { EmptyState } from '../components/common/EmptyState';
 import { colors, spacing, typography } from '../styles/theme';
+import type { MainTabScreenProps } from '../navigation/types';
 
-export function HomeScreen({
-  navigation,
-}: {
-  navigation: any;
-}) {
+export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const [centers, setCenters] = useState<Center[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

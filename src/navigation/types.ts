@@ -1,5 +1,11 @@
+import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import type {
+  CompositeScreenProps,
+  NavigatorScreenParams,
+} from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { NavigatorScreenParams } from '@react-navigation/native';
+
+import type { AvailabilityModality, PublicAppointment } from '../types';
 
 // ================================
 // Listas de parámetros de navegación
@@ -20,7 +26,7 @@ export type RootStackParamList = {
   };
   Booking: {
     centerId: string;
-    modality: 'VIRTUAL' | 'PRESENCIAL';
+    modality: AvailabilityModality;
     date: string;
     duration: number;
     time: string;
@@ -35,10 +41,12 @@ export type RootStackParamList = {
     patientPhone?: string;
   };
   Confirmation: {
-    appointment: Record<string, unknown>;
-    patientName: string;
-    patientLastName: string;
-    patientEmail: string;
+    /** Cita creada, tal como la devolvió el backend. */
+    appointment: PublicAppointment;
+    /** Día del slot en hora local del centro (`YYYY-MM-DD`). */
+    date: string;
+    /** Hora del slot en hora local del centro (`HH:MM`). */
+    time: string;
     patientPhone?: string;
   };
 };
@@ -47,5 +55,18 @@ export type RootStackParamList = {
 // Props tipadas para las pantallas
 // ================================
 
+/** Pantalla del stack principal (Terapeutas → Reserva → Confirmación). */
 export type ScreenProps<T extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, T>;
+
+/**
+ * Pantalla de una pestaña. Se compone con el stack para que `navigate` acepte
+ * tanto rutas hermanas de la tab (`Home`, `Profile`) como rutas del stack
+ * padre (`TherapistList`, `Availability`, ...).
+ */
+export type MainTabScreenProps<T extends keyof MainTabsParamList> =
+  CompositeScreenProps<
+    BottomTabScreenProps<MainTabsParamList, T>,
+    NativeStackScreenProps<RootStackParamList>
+  >;
+

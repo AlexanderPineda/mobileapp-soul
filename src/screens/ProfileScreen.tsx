@@ -3,8 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '../components/common/Button';
 import { colors, spacing, typography } from '../styles/theme';
+import type { MainTabScreenProps } from '../navigation/types';
 
-export function ProfileScreen({ navigation }: { navigation: any }) {
+export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
   return (
     <View style={styles.container}>
       <View style={styles.iconRow}>

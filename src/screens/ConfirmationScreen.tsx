@@ -3,49 +3,40 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '../components/common/Button';
 import { buildGoogleCalendarUrl } from '../utils/googleCalendar';
+import { formatHour, formatLongDate } from '../utils/format';
 import { colors, spacing, typography } from '../styles/theme';
+import type { ScreenProps } from '../navigation/types';
 
 export function ConfirmationScreen({
   route,
   navigation,
-}: {
-  route: {
-    params: {
-      appointment: Record<string, unknown>;
-      patientName: string;
-      patientLastName: string;
-      patientEmail: string;
-      patientPhone?: string;
-    };
-  };
-  navigation: any;
-}) {
-  const {
-    appointment,
-    patientName,
-    patientLastName,
-    patientEmail,
-    patientPhone,
-  } = route.params;
+}: ScreenProps<'Confirmation'>) {
+  const { appointment, date, time, patientPhone } = route.params;
 
-  const fullName = `${patientName} ${patientLastName}`.trim();
-
-  const appointmentStart = appointment?.startTime as string | undefined;
-  const appointmentEnd = appointment?.endTime as string | undefined;
-  const appointmentTitle = (appointment?.title as string) || 'Sesión de terapia';
-  const canAddToCalendar = Boolean(appointmentStart && appointmentEnd);
+  const patient = appointment.patient;
+  const fullName = `${patient?.firstName ?? ''} ${patient?.lastName ?? ''}`.trim();
+  const therapist = appointment.staffProfile?.user;
+  const therapistName = `${therapist?.firstName ?? ''} ${therapist?.lastName ?? ''}`.trim();
 
   const handleAddToGoogleCalendar = () => {
-    if (!appointmentStart || !appointmentEnd) return;
     const url = buildGoogleCalendarUrl({
-      title: appointmentTitle,
-      startTime: appointmentStart,
-      endTime: appointmentEnd,
+      title: appointment.title || 'Sesión de terapia',
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
       description: `Cita confirmada. Paciente: ${fullName}`,
     });
-    Linking.openURL(url).catch((err) =>
+    Linking.openURL(url).catch((err: unknown) =>
       console.error('Error opening Google Calendar:', err),
     );
+  };
+
+  const handleDone = () => {
+    // Se limpia todo el stack de reserva: volver atrás ya no es posible ni
+    // deseable después de crear la cita.
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'MainTabs', params: { screen: 'Home' } }],
+    });
   };
 
   return (
@@ -64,7 +55,7 @@ export function ConfirmationScreen({
         <Text style={styles.value}>{fullName}</Text>
 
         <Text style={styles.label}>Correo</Text>
-        <Text style={styles.value}>{patientEmail}</Text>
+        <Text style={styles.value}>{patient?.email}</Text>
 
         {patientPhone ? (
           <>
@@ -72,20 +63,35 @@ export function ConfirmationScreen({
             <Text style={styles.value}>{patientPhone}</Text>
           </>
         ) : null}
+
+        <Text style={styles.label}>Fecha y hora</Text>
+        <Text style={styles.value}>
+          {formatLongDate(date)} a las {formatHour(time)}
+        </Text>
+
+        <Text style={styles.label}>Servicio</Text>
+        <Text style={styles.value}>{appointment.title}</Text>
+
+        <Text style={styles.label}>Modalidad</Text>
+        <Text style={styles.value}>
+          {appointment.isVirtual ? 'Virtual' : 'Presencial'}
+        </Text>
+
+        {therapistName ? (
+          <>
+            <Text style={styles.label}>Terapeuta asignado</Text>
+            <Text style={styles.value}>{therapistName}</Text>
+          </>
+        ) : null}
       </View>
 
-      {canAddToCalendar ? (
-        <Button
-          title="Agregar a Google Calendar"
-          variant="secondary"
-          onPress={handleAddToGoogleCalendar}
-        />
-      ) : null}
-
       <Button
-        title="Listo"
-        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
+        title="Agregar a Google Calendar"
+        variant="secondary"
+        onPress={handleAddToGoogleCalendar}
       />
+
+      <Button title="Listo" onPress={handleDone} />
     </View>
   );
 }
@@ -97,11 +103,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.lg,
+    gap: spacing.md,
   },
   iconRow: { alignItems: 'center', justifyContent: 'center' },
   icon: { fontSize: 40 },
   title: { ...typography.h1, color: colors.text },
-  subtitle: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
+  subtitle: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: colors.borderRadius.md,
@@ -112,3 +123,4 @@ const styles = StyleSheet.create({
   label: { ...typography.label, color: colors.textSecondary },
   value: { ...typography.body, fontWeight: '600', color: colors.text },
 });
+

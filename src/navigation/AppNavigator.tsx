@@ -44,7 +44,13 @@ export function AppNavigator() {
         <Stack.Screen
           name="Confirmation"
           component={ConfirmationScreen}
-          options={{ title: '¡Reserva confirmada!' }}
+          options={{
+            title: '¡Reserva confirmada!',
+            // La cita ya se envió al backend: si el paciente vuelve atrás llega
+            // al formulario y puede crear una reserva duplicada.
+            headerBackVisible: false,
+            gestureEnabled: false,
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
