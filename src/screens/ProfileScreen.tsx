@@ -17,7 +17,12 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
         { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg },
       ]}
     >
-      <View style={styles.iconRow}>
+      {/* Emoji decorativo: oculto para el lector de pantalla. */}
+      <View
+        style={styles.iconRow}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Text style={styles.icon}>👤</Text>
       </View>
       <Text style={styles.title}>Perfil</Text>

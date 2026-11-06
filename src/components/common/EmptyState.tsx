@@ -1,6 +1,6 @@
 import React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
-import { colors, typography } from '../../styles/theme';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 
 export interface EmptyStateProps {
   title: string;
@@ -9,13 +9,32 @@ export interface EmptyStateProps {
   onAction?: () => void;
 }
 
-export function EmptyState({ title, description, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  actionLabel,
+  onAction,
+}: EmptyStateProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      {/*
+        `accessibilityLiveRegion` hace que TalkBack/VoiceOver lean el mensaje
+        cuando aparece tras una carga fallida.
+      */}
+      <Text style={styles.title} accessibilityRole="header" accessibilityLiveRegion="polite">
+        {title}
+      </Text>
       {description ? <Text style={styles.description}>{description}</Text> : null}
       {actionLabel && onAction ? (
-        <Text style={styles.button} onPress={onAction}>{actionLabel}</Text>
+        <Pressable
+          onPress={onAction}
+          style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}
+          accessibilityRole="button"
+          accessibilityLabel={actionLabel}
+          hitSlop={8}
+        >
+          <Text style={styles.actionLabel}>{actionLabel}</Text>
+        </Pressable>
       ) : null}
     </View>
   );
@@ -26,10 +45,30 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    gap: 12,
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
-  title: { ...typography.h3, color: colors.text },
-  description: { ...typography.body, color: colors.textSecondary, textAlign: 'center' },
-  button: { ...typography.body, color: colors.primary, fontSize: 15, fontWeight: '600' },
+  title: { ...typography.h3, color: colors.text, textAlign: 'center' },
+  description: {
+    ...typography.body,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  // Antes la acción era un `<Text onPress>`: no era un botón para el lector de
+  // pantalla y no llegaba al objetivo táctil mínimo de 44 puntos.
+  action: {
+    minHeight: 44,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  actionPressed: { backgroundColor: colors.surfaceInset },
+  actionLabel: {
+    ...typography.body,
+    color: colors.primary,
+    fontWeight: '600',
+  },
 });

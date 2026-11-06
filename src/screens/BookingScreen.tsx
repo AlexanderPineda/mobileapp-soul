@@ -179,7 +179,16 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           />
         </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? (
+          <Text
+            style={styles.error}
+            accessibilityRole="alert"
+            // Anuncia el fallo sin que el usuario tenga que recorrer la pantalla.
+            accessibilityLiveRegion="polite"
+          >
+            {error}
+          </Text>
+        ) : null}
 
         <Button
           title="Confirmar reserva"

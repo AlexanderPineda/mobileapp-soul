@@ -10,8 +10,20 @@ interface CenterCardProps {
 
 export function CenterCard({ center, onSelect }: CenterCardProps) {
   return (
-    <TouchableOpacity onPress={() => onSelect(center)} style={styles.card}>
-      <View style={styles.iconRow}>
+    <TouchableOpacity
+      onPress={() => onSelect(center)}
+      style={styles.card}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver terapeutas de ${center.name}`}
+      accessibilityHint="Abre la lista de terapeutas del centro"
+    >
+      {/* Emoji decorativo: se oculta para que el lector no lea "marcador". */}
+      <View
+        style={styles.iconRow}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Text style={styles.icon}>📍</Text>
       </View>
       <Text style={styles.name}>{center.name}</Text>

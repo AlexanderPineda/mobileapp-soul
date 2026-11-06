@@ -12,16 +12,32 @@ export function TherapistCard({ therapist, onSelect }: TherapistCardProps) {
   const initials =
     `${therapist.user?.firstName?.[0] ?? ''}${therapist.user?.lastName?.[0] ?? ''}`.toUpperCase();
   const name = `${therapist.user?.firstName ?? ''} ${therapist.user?.lastName ?? ''}`.trim();
+  const displayName = name || 'Terapeuta';
+  const specialty = therapist.specialty;
 
   return (
-    <TouchableOpacity onPress={() => onSelect(therapist)} style={styles.card}>
+    <TouchableOpacity
+      onPress={() => onSelect(therapist)}
+      style={styles.card}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={
+        specialty ? `${displayName}, ${specialty}` : displayName
+      }
+      accessibilityHint="Ver sus horarios disponibles"
+    >
       <View style={styles.avatarRow}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials || '♀'}</Text>
+        {/* El avatar es decorativo: el nombre ya va en la etiqueta. */}
+        <View
+          style={styles.avatar}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <Text style={styles.avatarText}>{initials || '👤'}</Text>
         </View>
         <View>
-          <Text style={styles.name}>{name || 'Terapeuta'}</Text>
-          {therapist.specialty ? <Text style={styles.specialty}>{therapist.specialty}</Text> : null}
+          <Text style={styles.name}>{displayName}</Text>
+          {specialty ? <Text style={styles.specialty}>{specialty}</Text> : null}
         </View>
       </View>
     </TouchableOpacity>

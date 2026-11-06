@@ -1,6 +1,12 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, ViewStyle } from 'react-native';
-import { colors, borderRadius } from '../../styles/theme';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native';
+import { borderRadius, colors } from '../../styles/theme';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'sm' | 'md' | 'lg';
@@ -26,12 +32,20 @@ export function Button({
   style,
   testID,
 }: ButtonProps) {
+  const isDisabled = Boolean(disabled || loading);
+  const isOnBrand = variant === 'primary' || variant === 'danger';
+  const contentColor = isOnBrand ? colors.surface : colors.text;
+
   const getVariantStyles = () => {
     switch (variant) {
       case 'primary':
         return { backgroundColor: colors.primary };
       case 'secondary':
-        return { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary };
+        return {
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.primary,
+        };
       case 'ghost':
         return {
           backgroundColor: 'transparent',
@@ -49,11 +63,23 @@ export function Button({
   const getSizeStyles = () => {
     switch (size) {
       case 'sm':
-        return { paddingVertical: 8, paddingHorizontal: 12, borderRadius: borderRadius.sm };
+        return {
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          borderRadius: borderRadius.sm,
+        };
       case 'md':
-        return { paddingVertical: 12, paddingHorizontal: 16, borderRadius: borderRadius.md };
+        return {
+          paddingVertical: 12,
+          paddingHorizontal: 16,
+          borderRadius: borderRadius.md,
+        };
       case 'lg':
-        return { paddingVertical: 16, paddingHorizontal: 24, borderRadius: borderRadius.md };
+        return {
+          paddingVertical: 16,
+          paddingHorizontal: 24,
+          borderRadius: borderRadius.md,
+        };
       default:
         return {};
     }
@@ -62,21 +88,26 @@ export function Button({
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={disabled || loading}
-      style={[styles.button, getVariantStyles(), getSizeStyles(), style]}
+      disabled={isDisabled}
+      style={[
+        styles.button,
+        getVariantStyles(),
+        getSizeStyles(),
+        isDisabled && styles.disabled,
+        style,
+      ]}
       testID={testID}
+      activeOpacity={0.8}
+      accessibilityRole="button"
+      // Se mantiene el título aunque se muestre el spinner: si no, VoiceOver y
+      // TalkBack anuncian un botón sin nombre mientras se envía el formulario.
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: isDisabled, busy: Boolean(loading) }}
     >
       {loading ? (
-        <ActivityIndicator color={colors.surface} />
+        <ActivityIndicator color={contentColor} />
       ) : (
-        <Text
-          style={[
-            styles.text,
-            { color: variant === 'primary' || variant === 'danger' ? colors.surface : colors.text },
-          ]}
-        >
-          {title}
-        </Text>
+        <Text style={[styles.text, { color: contentColor }]}>{title}</Text>
       )}
     </TouchableOpacity>
   );
@@ -96,6 +127,8 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
+  /** Sin esto un botón deshabilitado se ve exactamente igual que uno activo. */
+  disabled: { opacity: 0.6 },
   text: {
     fontSize: 15,
     fontWeight: '600',

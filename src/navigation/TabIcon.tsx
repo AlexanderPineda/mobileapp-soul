@@ -10,8 +10,15 @@ export function TabIcon({
 }) {
   return (
     // `allowFontScaling={false}`: con Dynamic Type alto el emoji desborda la
-    // altura fija de la tab bar y rompe el layout.
-    <Text style={[styles.element, style]} allowFontScaling={false}>
+    // altura fija de la tab bar y rompe el layout. El emoji es decorativo: la
+    // etiqueta de la pestaña ya la aporta `title` en el navegador.
+    <Text
+      style={[styles.element, style]}
+      allowFontScaling={false}
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+    >
       {children}
     </Text>
   );

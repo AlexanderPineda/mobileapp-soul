@@ -41,7 +41,12 @@ export function ConfirmationScreen({
 
   return (
     <View style={styles.container}>
-      <View style={styles.iconRow}>
+      {/* Emoji decorativo: oculto para el lector de pantalla. */}
+      <View
+        style={styles.iconRow}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
         <Text style={styles.icon}>✅</Text>
       </View>
       <Text style={styles.title}>¡Reserva confirmada!</Text>
