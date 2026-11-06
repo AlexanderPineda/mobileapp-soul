@@ -15,7 +15,12 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" />
+      {/*
+        El tema es claro (crema/sage): con `light-content` los iconos de la barra
+        de estado quedaban blancos sobre fondo claro e invisibles. En RN 0.87 con
+        edge-to-edge el fondo lo pinta la app, no `backgroundColor`.
+      */}
+      <StatusBar barStyle="dark-content" />
       <AppNavigator />
     </SafeAreaProvider>
   );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { api } from '../api/apiClient';
 import { Center } from '../types';
@@ -9,6 +10,9 @@ import { colors, spacing, typography } from '../styles/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
 export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
+  // La tab no tiene header propio: el inset superior se aplica aquí para que el
+  // título no quede debajo de la barra de estado con edge-to-edge.
+  const insets = useSafeAreaInsets();
   const [centers, setCenters] = useState<Center[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +43,7 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>Encuentra tu centro</Text>
         <Text style={styles.subtitle}>

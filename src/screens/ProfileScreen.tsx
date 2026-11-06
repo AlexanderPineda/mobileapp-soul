@@ -1,13 +1,22 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '../components/common/Button';
 import { colors, spacing, typography } from '../styles/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
 export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
+  // Sin header propio: se respetan los insets del sistema en ambos extremos.
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg },
+      ]}
+    >
       <View style={styles.iconRow}>
         <Text style={styles.icon}>👤</Text>
       </View>

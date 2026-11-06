@@ -1,12 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import type { MainTabsParamList } from './types';
 import { TabIcon } from './TabIcon';
+import { colors } from '../styles/theme';
 
 const Tab = createBottomTabNavigator<MainTabsParamList>();
+
+/** Altura del contenido de la tab bar, sin el inset del sistema. */
+const TAB_BAR_HEIGHT = 60;
 
 /**
  * Los iconos se definen fuera del componente para evitar recrearlos en cada
@@ -16,17 +21,28 @@ const homeIcon = () => <TabIcon>🏠</TabIcon>;
 const profileIcon = () => <TabIcon>👤</TabIcon>;
 
 export function MainTabsNavigator() {
+  /**
+   * Con edge-to-edge activo (Android 15+ y `edgeToEdgeEnabled=true`) la barra de
+   * navegación del sistema se dibuja encima de la app. Al fijar `height` hay que
+   * sumar el inset inferior a mano; de lo contrario las etiquetas quedan tapadas
+   * en los iPhone con home indicator y en Android con navegación por gestos.
+   */
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#4F46E5',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
+          borderTopColor: colors.border,
           paddingTop: 8,
-          height: 76,
+          paddingBottom: insets.bottom + 8,
+          height: TAB_BAR_HEIGHT + insets.bottom,
         },
       }}
     >
