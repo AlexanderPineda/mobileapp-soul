@@ -33,7 +33,12 @@ export function Button({
       case 'secondary':
         return { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary };
       case 'ghost':
-        return { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.border };
+        return {
+          backgroundColor: 'transparent',
+          borderWidth: 1,
+          // Borde de control visible (3.03:1); `colors.border` es decorativo.
+          borderColor: colors.borderStrong,
+        };
       case 'danger':
         return { backgroundColor: colors.error };
       default:

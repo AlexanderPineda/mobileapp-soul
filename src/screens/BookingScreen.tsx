@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { api } from '../api/apiClient';
+import { getErrorMessage } from '../api/errors';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { colors, spacing, typography } from '../styles/theme';
@@ -91,73 +99,96 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
         patientPhone: phone.trim() || undefined,
       });
     } catch (err: unknown) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Reserva de sesión</Text>
-        <Text style={styles.subtitle}>
-          Completa tus datos y confirma. Ya casi terminas.
-        </Text>
-      </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {/*
+        Con el teclado abierto el formulario (resumen + 4 campos + botón) no cabe
+        en pantallas pequeñas, así que debe poder desplazarse.
+      */}
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <View style={styles.header}>
+          <Text style={styles.title}>Reserva de sesión</Text>
+          <Text style={styles.subtitle}>
+            Completa tus datos y confirma. Ya casi terminas.
+          </Text>
+        </View>
 
-      <View style={styles.summary}>
-        <Text style={styles.summaryLabel}>Servicio</Text>
-        <Text style={styles.summaryValue}>{serviceLabel}</Text>
-        <Text style={styles.summaryLabel}>Duración</Text>
-        <Text style={styles.summaryValue}>{duration} minutos</Text>
-        <Text style={styles.summaryLabel}>Modalidad</Text>
-        <Text style={styles.summaryValue}>
-          {modality === 'VIRTUAL' ? 'Virtual' : 'Presencial'}
-        </Text>
-        <Text style={styles.summaryLabel}>Fecha y hora</Text>
-        <Text style={styles.summaryValue}>
-          {formatLongDate(date)} a las {formatHour(time)}
-        </Text>
-      </View>
+        <View style={styles.summary}>
+          <Text style={styles.summaryLabel}>Servicio</Text>
+          <Text style={styles.summaryValue}>{serviceLabel}</Text>
+          <Text style={styles.summaryLabel}>Duración</Text>
+          <Text style={styles.summaryValue}>{duration} minutos</Text>
+          <Text style={styles.summaryLabel}>Modalidad</Text>
+          <Text style={styles.summaryValue}>
+            {modality === 'VIRTUAL' ? 'Virtual' : 'Presencial'}
+          </Text>
+          <Text style={styles.summaryLabel}>Fecha y hora</Text>
+          <Text style={styles.summaryValue}>
+            {formatLongDate(date)} a las {formatHour(time)}
+          </Text>
+        </View>
 
-      <Input
-        label="Nombre"
-        value={firstName}
-        onChangeText={setFirstName}
-        placeholder="Tu nombre"
-      />
-      <Input
-        label="Apellido"
-        value={lastName}
-        onChangeText={setLastName}
-        placeholder="Tú apellido"
-      />
-      <Input
-        label="Correo"
-        value={email}
-        onChangeText={setEmail}
-        placeholder="tu@correo.com"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <Input
-        label="Teléfono"
-        value={phone}
-        onChangeText={setPhone}
-        placeholder="Opcional"
-        keyboardType="phone-pad"
-      />
+        <View style={styles.fields}>
+          <Input
+            label="Nombre"
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder="Tu nombre"
+            autoComplete="given-name"
+            textContentType="givenName"
+          />
+          <Input
+            label="Apellido"
+            value={lastName}
+            onChangeText={setLastName}
+            placeholder="Tu apellido"
+            autoComplete="family-name"
+            textContentType="familyName"
+          />
+          <Input
+            label="Correo"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="tu@correo.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+          />
+          <Input
+            label="Teléfono"
+            value={phone}
+            onChangeText={setPhone}
+            placeholder="Opcional"
+            keyboardType="phone-pad"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+          />
+        </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Button
-        title="Confirmar reserva"
-        onPress={handleSubmit}
-        loading={submitting}
-        disabled={submitting}
-      />
-    </View>
+        <Button
+          title="Confirmar reserva"
+          onPress={handleSubmit}
+          loading={submitting}
+          disabled={submitting}
+        />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -165,7 +196,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  content: {
     padding: spacing.md,
+    paddingBottom: spacing.xl,
   },
   header: { padding: spacing.lg, gap: spacing.sm },
   title: { ...typography.h1, color: colors.text },
@@ -183,6 +217,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
+  fields: { gap: spacing.sm },
   error: {
     color: colors.error,
     fontSize: 13,

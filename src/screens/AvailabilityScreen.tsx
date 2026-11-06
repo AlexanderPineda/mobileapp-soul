@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 import { api } from '../api/apiClient';
+import { getErrorMessage } from '../api/errors';
 import { FreeSlot, FreeSlotsResult } from '../types';
 import { SERVICE_TYPES } from '../types';
 import { SlotItem } from '../components/availability/SlotItem';
@@ -20,6 +21,12 @@ export function AvailabilityScreen({
   const [date, setDate] = useState<string>(() => toISODate(new Date()));
   const [serviceTypeIndex, setServiceTypeIndex] = useState(0);
   const [slots, setSlots] = useState<FreeSlot[]>([]);
+  /**
+   * `false` cuando el centro no tiene franjas configuradas para ese servicio y
+   * modalidad. Se distingue de "no hay huecos ese día" para no mandar al
+   * paciente a probar días que tampoco tendrán horarios.
+   */
+  const [configured, setConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +49,10 @@ export function AvailabilityScreen({
       // El backend ya descarta el pasado; se filtra otra vez por si el listado
       // queda obsoleto mientras la pantalla está abierta.
       const now = new Date();
+      setConfigured(result.configured);
       setSlots((result.slots ?? []).filter((slot) => !hasStarted(slot.startTime, now)));
     } catch (err: unknown) {
-      setError((err as Error).message);
+      setError(getErrorMessage(err));
       setSlots([]);
     } finally {
       setLoading(false);
@@ -117,6 +125,11 @@ export function AvailabilityScreen({
         <View style={styles.loading}>
           <Text style={styles.loadingText}>Cargando horarios…</Text>
         </View>
+      ) : !configured ? (
+        <EmptyState
+          title="Este centro aún no tiene agenda para este servicio"
+          description="Comunícate con el centro para conocer sus horarios de atención."
+        />
       ) : slots.length === 0 ? (
         <EmptyState
           title="No hay horarios disponibles"
@@ -164,7 +177,9 @@ const styles = StyleSheet.create({
   picker: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    // Borde de control (3.03:1). `colors.border` es el hairline decorativo y no
+    // cumple WCAG 1.4.11 sobre las superficies de la app.
+    borderColor: colors.borderStrong,
     borderRadius: colors.borderRadius.md,
     paddingHorizontal: 12,
     height: 50,

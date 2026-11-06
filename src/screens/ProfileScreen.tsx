@@ -25,10 +25,7 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
         Esta versión de la app no incluye el perfil de paciente. Pronto podrás
         ver tu historial de citas y datos de contacto.
       </Text>
-      <Button
-        title="Volver al inicio"
-        onPress={() => navigation.goBack()}
-      />
+      <Button title="Volver al inicio" onPress={() => navigation.navigate('Home')} />
     </View>
   );
 }

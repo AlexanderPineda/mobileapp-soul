@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { api } from '../api/apiClient';
+import { getErrorMessage } from '../api/errors';
 import { Center } from '../types';
 import { CenterCard } from '../components/centers/CenterCard';
 import { EmptyState } from '../components/common/EmptyState';
@@ -28,7 +29,7 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError((err as Error).message);
+        setError(getErrorMessage(err));
         setCenters([]);
         setLoading(false);
       });

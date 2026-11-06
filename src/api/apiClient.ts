@@ -1,4 +1,5 @@
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, API_TIMEOUT_MS } from '../config';
+import { ApiError } from './errors';
 
 interface RequestOptions {
   method?: string;
@@ -36,7 +37,7 @@ async function fetchJson<T>(
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
   try {
     const response = await fetch(url, {
@@ -85,12 +86,4 @@ export const api = {
     fetchJson<T>(endpoint, { method: 'DELETE', params }),
 };
 
-export class ApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-  }
-}
+export { ApiError } from './errors';

@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
+    // Borde de control: `colors.border` (1.69:1) no cumple WCAG 1.4.11.
+    borderColor: colors.borderStrong,
     borderRadius: colors.borderRadius.md,
     paddingHorizontal: 12,
     paddingVertical: 12,

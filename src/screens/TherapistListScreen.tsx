@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { api } from '../api/apiClient';
+import { getErrorMessage } from '../api/errors';
 import { StaffProfile } from '../types';
 import { TherapistCard } from '../components/therapists/TherapistCard';
 import { EmptyState } from '../components/common/EmptyState';
@@ -29,7 +30,7 @@ export function TherapistListScreen({
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError((err as Error).message);
+        setError(getErrorMessage(err));
         setTherapists([]);
         setLoading(false);
       });
