@@ -52,7 +52,7 @@ export function TherapistListScreen({
       <View style={styles.header}>
         <Text style={styles.title}>Terapeutas</Text>
         <Text style={styles.subtitle}>
-          Elige un terapeuta para ver sus disponibilidad.
+          Elige un terapeuta para ver su disponibilidad.
         </Text>
       </View>
 

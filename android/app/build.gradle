@@ -92,15 +92,28 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        // La firma de release se lee de `~/.gradle/gradle.properties` (o de
+        // variables de entorno con los mismos nombres):
+        //   SOUL_UPLOAD_STORE_FILE, SOUL_UPLOAD_STORE_PASSWORD,
+        //   SOUL_UPLOAD_KEY_ALIAS, SOUL_UPLOAD_KEY_PASSWORD
+        // Sin esos valores `assembleRelease`/`bundleRelease` fallan con un
+        // mensaje claro, en lugar de producir un build firmado con la clave de
+        // debug (que Play Store rechaza).
+        release {
+            if (project.hasProperty('SOUL_UPLOAD_STORE_FILE')) {
+                storeFile file(SOUL_UPLOAD_STORE_FILE)
+                storePassword SOUL_UPLOAD_STORE_PASSWORD
+                keyAlias SOUL_UPLOAD_KEY_ALIAS
+                keyPassword SOUL_UPLOAD_KEY_PASSWORD
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }

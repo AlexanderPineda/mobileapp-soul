@@ -12,17 +12,6 @@ export type AppointmentStatus =
 
 export type AvailabilityModality = 'VIRTUAL' | 'PRESENCIAL';
 
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface Center {
   id: string;
   name: string;
@@ -49,49 +38,6 @@ export interface StaffProfile {
   center?: { id: string; name: string };
 }
 
-export interface Patient {
-  id: string;
-  centerId: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  birthDate?: string;
-  emergencyContact?: string;
-  emergencyPhone?: string;
-  address?: string;
-  occupation?: string;
-  referredBy?: string;
-  insurance?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Appointment {
-  id: string;
-  patientId: string;
-  staffProfileId: string;
-  centerId: string;
-  locationId?: string;
-  createdBy: string;
-  title: string;
-  description?: string;
-  status: AppointmentStatus;
-  startTime: string;
-  endTime: string;
-  durationMinutes: number;
-  isVirtual: boolean;
-  notes?: string;
-  cancellationReason?: string;
-  createdAt: string;
-  updatedAt: string;
-  patient?: Patient;
-  staffProfile?: StaffProfile;
-  center?: Center;
-  location?: { id: string; name: string };
-}
-
 export interface FreeSlot {
   /** Hora de pared del centro (`HH:MM`), tal como se muestra al paciente. */
   time: string;
@@ -105,7 +51,9 @@ export interface FreeSlotsResult {
   slots: FreeSlot[];
 }
 
-// Servicios ofertados (coinciden con la palabra a la que responde el backend).
+// Servicios ofertados. Deben coincidir exactamente con el enum `ServiceType` de
+// `backend-soul` (`create-public-appointment.dto.ts`): el backend rechaza con
+// 400 cualquier otro valor.
 export interface ServiceTypeOption {
   value: string;
   label: string;
@@ -119,11 +67,6 @@ export const SERVICE_TYPES: ServiceTypeOption[] = [
   { value: 'Terapia individual virtual', label: 'Terapia individual virtual', durationMinutes: 45, modality: 'VIRTUAL' },
   { value: 'Terapia individual presencial', label: 'Terapia individual presencial', durationMinutes: 45, modality: 'PRESENCIAL' },
 ];
-
-export interface LoginResponse {
-  accessToken: string;
-  user: User;
-}
 
 /**
  * Respuesta de `POST /public/appointments`.
@@ -154,7 +97,3 @@ export interface PublicAppointment {
   };
 }
 
-export interface ApiError {
-  message: string;
-  status: number;
-}

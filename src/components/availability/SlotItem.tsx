@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FreeSlot } from '../../types';
-import { colors, typography, spacing } from '../../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 import { formatHour } from '../../utils/format';
 
 interface SlotItemProps {
@@ -15,20 +15,20 @@ export function SlotItem({ slot, onSelect }: SlotItemProps) {
 
   return (
     <TouchableOpacity
-      style={[styles.container, count > 0 && styles.available]}
+      style={styles.container}
       onPress={() => onSelect(slot)}
-      disabled={count === 0}
+      accessibilityRole="button"
+      accessibilityLabel={`${formatHour(slot.time)}, ${count} terapeuta${
+        count === 1 ? '' : 's'
+      } disponible${count === 1 ? '' : 's'}`}
     >
       <View style={styles.timeRow}>
-        <Text style={styles.timeText}>{slot.time}</Text>
-        <Text style={styles.timeLabel}>{formatHour(slot.time)}</Text>
-      </View>
-      <View style={styles.countRow}>
-        <Text style={styles.countNumber}>{count}</Text>
+        <Text style={styles.timeText}>{formatHour(slot.time)}</Text>
         <Text style={styles.countLabel}>
-          {count} terapeuta{plural} disponible{plural} · toque para reservar
+          {count} terapeuta{plural} disponible{plural}
         </Text>
       </View>
+      <Text style={styles.hint}>Toque para reservar</Text>
     </TouchableOpacity>
   );
 }
@@ -36,17 +36,17 @@ export function SlotItem({ slot, onSelect }: SlotItemProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
-    borderRadius: colors.borderRadius.md,
+    borderWidth: 1,
+    // Borde de control visible (3.03:1): cada tarjeta es pulsable.
+    borderColor: colors.borderStrong,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
-    gap: spacing.sm,
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
-  },
-  available: {
-    borderWidth: 1,
-    borderColor: colors.primary,
   },
   timeRow: {
     flexDirection: 'row',
@@ -54,10 +54,6 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   timeText: { ...typography.h3, color: colors.primary },
-  timeLabel: { ...typography.bodySmall, color: colors.textSecondary },
-  countRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  countNumber: { ...typography.h3, color: colors.success },
-  countLabel: { ...typography.bodySmall, color: colors.textSecondary },
+  countLabel: { ...typography.bodySmall, color: colors.success },
+  hint: { ...typography.caption, color: colors.textSecondary },
 });
-
-export default SlotItem;

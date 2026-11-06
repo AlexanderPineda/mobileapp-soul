@@ -12,7 +12,7 @@ import { api } from '../api/apiClient';
 import { getErrorMessage } from '../api/errors';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
-import { colors, spacing, typography } from '../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { formatHour, formatLongDate, hasStarted } from '../utils/format';
 import type { PublicAppointment } from '../types';
 import type { ScreenProps } from '../navigation/types';
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   subtitle: { ...typography.body, color: colors.textSecondary },
   summary: {
     backgroundColor: colors.surface,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     gap: spacing.sm,
     marginBottom: spacing.md,

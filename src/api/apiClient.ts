@@ -31,7 +31,10 @@ async function fetchJson<T>(
   if (params && Object.keys(params).length > 0) {
     const query = Object.entries(params)
       .filter(([, value]) => value !== undefined && value !== null)
-      .map(([key, value]) => `${key}=${encodeURIComponent(String(value))}`)
+      .map(
+        ([key, value]) =>
+          `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+      )
       .join('&');
     url = `${url}?${query}`;
   }
@@ -63,6 +66,11 @@ async function fetchJson<T>(
       throw new ApiError(message, response.status);
     }
 
+    // 204 No Content (p. ej. DELETE) no tiene cuerpo que parsear.
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     return (await response.json()) as T;
   } finally {
     clearTimeout(timeout);
@@ -85,5 +93,3 @@ export const api = {
   delete: <T>(endpoint: string, params?: RequestOptions['params']) =>
     fetchJson<T>(endpoint, { method: 'DELETE', params }),
 };
-
-export { ApiError } from './errors';

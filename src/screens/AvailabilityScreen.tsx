@@ -8,7 +8,7 @@ import { FreeSlot, FreeSlotsResult } from '../types';
 import { SERVICE_TYPES } from '../types';
 import { SlotItem } from '../components/availability/SlotItem';
 import { EmptyState } from '../components/common/EmptyState';
-import { colors, spacing, typography } from '../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { formatDate, hasStarted, toISODate } from '../utils/format';
 import type { ScreenProps } from '../navigation/types';
 
@@ -77,7 +77,7 @@ export function AvailabilityScreen({
       <View style={styles.header}>
         <Text style={styles.title}>Horarios disponibles</Text>
         <Text style={styles.subtitle}>
-          Elige la modalidad del servicio y un día para reservar.
+          Elige el servicio y el día para ver los horarios libres.
         </Text>
       </View>
 
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     // Borde de control (3.03:1). `colors.border` es el hairline decorativo y no
     // cumple WCAG 1.4.11 sobre las superficies de la app.
     borderColor: colors.borderStrong,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     paddingHorizontal: 12,
     height: 50,
   },
@@ -194,5 +194,3 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   loadingText: { ...typography.body, color: colors.textSecondary },
 });
-
-export default AvailabilityScreen;

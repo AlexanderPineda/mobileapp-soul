@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Center } from '../../types';
-import { colors, typography, spacing } from '../../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 
 interface CenterCardProps {
   center: Center;
@@ -22,7 +22,7 @@ export function CenterCard({ center, onSelect }: CenterCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     gap: spacing.sm,
     shadowColor: '#000',

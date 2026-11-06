@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { StaffProfile } from '../../types';
-import { colors, typography, spacing } from '../../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 
 interface TherapistCardProps {
   therapist: StaffProfile;
@@ -31,7 +31,7 @@ export function TherapistCard({ therapist, onSelect }: TherapistCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     padding: spacing.md,
     gap: spacing.sm,
     shadowColor: '#000',
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 44,
     height: 44,
-    borderRadius: colors.borderRadius.full,
+    borderRadius: borderRadius.full,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',

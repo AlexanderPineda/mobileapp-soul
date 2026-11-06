@@ -9,12 +9,6 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export function toISOTime(date: Date): string {
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
-}
-
 /**
  * ¿El instante ISO ya pasó (o es justo ahora)?
  *
@@ -62,9 +56,4 @@ export function formatDate(date: Date, locale = 'es-CO'): string {
     month: 'short',
     day: 'numeric',
   });
-}
-
-export function isToday(date: Date): boolean {
-  const today = new Date();
-  return toISODate(date) === toISODate(today);
 }

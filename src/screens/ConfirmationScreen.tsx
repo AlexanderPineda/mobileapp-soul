@@ -4,7 +4,7 @@ import { Linking, StyleSheet, Text, View } from 'react-native';
 import { Button } from '../components/common/Button';
 import { buildGoogleCalendarUrl } from '../utils/googleCalendar';
 import { formatHour, formatLongDate } from '../utils/format';
-import { colors, spacing, typography } from '../styles/theme';
+import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import type { ScreenProps } from '../navigation/types';
 
 export function ConfirmationScreen({
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     padding: spacing.md * 2,
     gap: spacing.sm,
     width: '100%',

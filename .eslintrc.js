@@ -13,7 +13,12 @@ module.exports = {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       rules: {
-        '@typescript-eslint/no-unused-vars': 'off',
+        // Las props y los parámetros con prefijo `_` son intencionalmente
+        // ignorados; el resto de variables sin usar deben avisar.
+        '@typescript-eslint/no-unused-vars': [
+          'warn',
+          { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        ],
       },
     },
   ],

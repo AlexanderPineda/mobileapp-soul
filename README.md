@@ -3,7 +3,7 @@
 App React Native para que el paciente elija centro, terapeuta, servicio, día y
 horario, complete sus datos y confirme la reserva contra el backend NestJS/Prisma.
 
-- **App**: `AppSoul/` (React Native 0.87.1, Hermes, React Navigation 7)
+- **App**: `mobileapp-soul/` (React Native 0.87.1, Hermes, React Navigation 7)
 - **Backend**: `../backend-soul/` (NestJS en puerto `777`, prefijo global `/api`)
 - **Base de datos**: PostgreSQL local, base `soul`
 
@@ -13,11 +13,11 @@ horario, complete sus datos y confirme la reserva contra el backend NestJS/Prism
 
 | Herramienta | Versión / ruta |
 | --- | --- |
-| Node.js | 20+ |
+| Node.js | 22.11+ (`engines` en `package.json`) |
 | JDK | 21 — `/Applications/Android Studio.app/Contents/jbr/Contents/Home` |
 | Android SDK | `$HOME/Library/Android/sdk` |
 | NDK | 27.1 (`ndkVersion` en `android/build.gradle`) |
-| Build-Tools | 36.0.0 |
+| Build-Tools | 37.0.0 |
 | CocoaPods | 1.17.0 (`brew install cocoapods`) |
 | Xcode | 26.2 + runtime de simulador iOS 26.x |
 
@@ -42,9 +42,22 @@ curl -s http://localhost:777/api/public/centers | head
 ## 2. Metro (dev server)
 
 ```sh
-cd AppSoul
+cd mobileapp-soul
 npm start          # http://localhost:8081
 ```
+
+### Scripts de calidad
+
+```sh
+npm test            # Jest (unitarios, sin red: `fetch` está mockeado)
+npm run lint        # ESLint
+npx tsc --noEmit    # TypeScript
+npm run tokens:check # paridad de design tokens con frontend-soul
+```
+
+`tokens:check` compara `src/styles/theme.ts` con
+`../frontend-soul/src/app/globals.css`; si el repo web no está clonado al lado
+avisa y termina con código 0. Es la comprobación ideal para CI.
 
 ---
 
@@ -101,6 +114,21 @@ resuelve el plugin de React Native (`AgpConfiguratorUtils.kt`):
 
 Para producción, sirve el backend por HTTPS y sustituye `API_BASE_URL` por la
 URL pública (o define `UI_API_URL`).
+
+### Firma de release
+
+El build de release **no** se firma con `debug.keystore`. Define en
+`~/.gradle/gradle.properties` (fuera del repositorio):
+
+```properties
+SOUL_UPLOAD_STORE_FILE=/ruta/a/soul-release.keystore
+SOUL_UPLOAD_STORE_PASSWORD=...
+SOUL_UPLOAD_KEY_ALIAS=...
+SOUL_UPLOAD_KEY_PASSWORD=...
+```
+
+Sin esas propiedades el build de release falla de forma explícita, que es
+preferible a generar un APK que Play Store rechazará.
 
 ---
 

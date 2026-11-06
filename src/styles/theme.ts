@@ -5,6 +5,11 @@
  * Los tokens marcados "paridad" deben coincidir con el web; lo comprueba
  * `npm run tokens:check`.
  *
+ * Nota: el contrato con el web incluye tokens que la app todavía no consume
+ * (p. ej. `warning`, `infoBg`, `overlay`). Se mantienen a propósito porque son
+ * la fuente de verdad compartida y el script de paridad los compara; borrarlos
+ * obligaría a recortar ese contrato y perderíamos el control de deriva.
+ *
  * Diferencias intencionales con el web (no son deriva):
  * - Sombras: React Native usa `shadowOffset` / `elevation`, no `box-shadow`,
  *   así que los `--elevation-*` del web no son reutilizables tal cual.
@@ -53,12 +58,9 @@ export const colors = {
   textSecondary: '#4D6572',
   /** Corrige el typo anterior (#F2EEF7 era violáceo). */
   muted: '#F2EEE7', // paridad: --muted
-  /** Alias de textSecondary. Se conserva el nombre por compatibilidad. */
-  mutedForeground: '#4D6572',
 
   // ==================== Marca / acción ====================
   primary: '#354B5C',
-  primaryDark: '#2A3B47',
   primaryLight: '#F6F0E8',
   accent: '#C4A68E',
   /** paridad: --accent-foreground #2B3D4B -> 4.91:1 sobre arena (antes 3.98:1) */
@@ -72,7 +74,6 @@ export const colors = {
   input: '#9E8768',
   /** Anillo de foco: 5.70:1 (antes #7A93A2 con 2.84:1). */
   ring: '#46617A',
-  disabled: '#DDE6DE',
 
   // ==================== Estado ====================
   error: '#94402D',
@@ -92,8 +93,6 @@ export const colors = {
    * `text` (mismo criterio que el web).
    */
   overlay: 'rgba(30, 44, 54, 0.55)',
-
-  borderRadius,
 };
 
 export const spacing = {

@@ -6,12 +6,11 @@ import {
   StyleSheet,
   TextInputProps,
 } from 'react-native';
-import { colors, typography } from '../../styles/theme';
+import { borderRadius, colors, typography } from '../../styles/theme';
 
 export interface InputProps extends TextInputProps {
   label: string;
   error?: string;
-  leftIcon?: string;
 }
 
 export function Input({
@@ -45,7 +44,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     // Borde de control: `colors.border` (1.69:1) no cumple WCAG 1.4.11.
     borderColor: colors.borderStrong,
-    borderRadius: colors.borderRadius.md,
+    borderRadius: borderRadius.md,
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 15,
