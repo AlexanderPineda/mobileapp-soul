@@ -11,6 +11,7 @@
     "test": "jest",
     "test:ci": "jest --ci --coverage",
     "tokens:check": "node scripts/check-tokens.mjs",
+    "icons:generate": "node scripts/generate-icons.mjs",
     "validate": "npm run typecheck && npm run lint && npm run test && npm run tokens:check"
   },
   "dependencies": {

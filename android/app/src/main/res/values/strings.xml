@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">AppSoul</string>
+    <!-- Nombre visible en el lanzador. El nombre interno del bundle sigue siendo
+         `AppSoul` (app.json → MainActivity/AppDelegate). -->
+    <string name="app_name">Soul</string>
 </resources>

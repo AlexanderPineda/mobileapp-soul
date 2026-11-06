@@ -156,7 +156,29 @@ El simulador **sí** alcanza `localhost` del host, por eso usa
 
 ---
 
-## 5. Datos de demostración
+## 5. Iconos y assets
+
+Los iconos de Android (legacy + capas del icono adaptativo, con `monochrome` para
+los iconos temáticos de Android 13) y los de iOS se generan con un script sin
+dependencias a partir de una única definición vectorial:
+
+```sh
+npm run icons:generate
+```
+
+Escribe en `android/app/src/main/res/mipmap-*/` y en
+`ios/AppSoul/Images.xcassets/AppIcon.appiconset/` (los PNG de iOS se generan en
+RGB, sin canal alfa, porque la App Store rechaza iconos con transparencia).
+Si cambia el diseño oficial, reemplaza los PNG o ajusta la geometría en
+`scripts/generate-icons.mjs`.
+
+Nombre visible: **Soul** (`strings.xml`, `CFBundleDisplayName` y
+`app.json → displayName`). El identificador interno del bundle sigue siendo
+`AppSoul`.
+
+---
+
+## 6. Datos de demostración
 
 Centro: **Centro Demo Norte** → terapeuta **Ana Ruiz** → servicio
 **Terapia Familiar** (60 min, Presencial).
@@ -170,7 +192,7 @@ backend descarta los horarios que ya empezaron.
 
 ---
 
-## 6. Verificación del flujo (validado en Android)
+## 7. Verificación del flujo (validado en Android)
 
 1. **Inicio** → lista de centros (`/public/centers`).
 2. Centro → **Terapeutas** filtrados por el centro elegido.
@@ -197,7 +219,7 @@ El `startTime` se guarda en UTC: un slot de **08:00** local (UTC-5) queda como
 
 ---
 
-## 7. Problemas frecuentes
+## 8. Problemas frecuentes
 
 | Síntoma | Causa | Solución |
 | --- | --- | --- |

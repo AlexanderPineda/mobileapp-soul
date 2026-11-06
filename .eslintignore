@@ -1,0 +1,4 @@
+# Artefactos generados: no se revisan con ESLint.
+coverage/
+android/
+ios/
