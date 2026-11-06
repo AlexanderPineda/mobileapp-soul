@@ -49,15 +49,22 @@ npm start          # http://localhost:8081
 ### Scripts de calidad
 
 ```sh
-npm test            # Jest (unitarios, sin red: `fetch` está mockeado)
+npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint
-npx tsc --noEmit    # TypeScript
+npm test            # Jest (sin red: `fetch` está mockeado)
+npm run test:ci     # Jest en modo CI con cobertura
 npm run tokens:check # paridad de design tokens con frontend-soul
+npm run validate    # ejecuta todo lo anterior en orden
 ```
 
 `tokens:check` compara `src/styles/theme.ts` con
 `../frontend-soul/src/app/globals.css`; si el repo web no está clonado al lado
-avisa y termina con código 0. Es la comprobación ideal para CI.
+avisa y termina con código 0.
+
+El workflow `.github/workflows/ci.yml` ejecuta `typecheck`, `lint`, `test:ci`
+(con la cobertura como artefacto) y la paridad de tokens en cada push y pull
+request a `main`. El job de tokens clona `soul-frontend` para comparar contra el
+CSS real.
 
 ---
 

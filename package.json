@@ -6,9 +6,12 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "test": "jest",
-    "tokens:check": "node scripts/check-tokens.mjs"
+    "test:ci": "jest --ci --coverage",
+    "tokens:check": "node scripts/check-tokens.mjs",
+    "validate": "npm run typecheck && npm run lint && npm run test && npm run tokens:check"
   },
   "dependencies": {
     "@react-native-picker/picker": "^2.11.4",

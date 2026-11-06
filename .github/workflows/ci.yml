@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancela ejecuciones antiguas del mismo ref cuando llega un push nuevo.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, tipos y tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          # `engines` exige >= 22.11.0
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm run test:ci
+
+      - name: Cobertura como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  tokens:
+    name: Paridad de design tokens
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout app móvil
+        uses: actions/checkout@v4
+
+      - name: Checkout design system web
+        uses: actions/checkout@v4
+        with:
+          repository: AlexanderPineda/soul-frontend
+          path: frontend-soul
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # `check-tokens.mjs` no usa dependencias: compara el CSS del web con el
+      # theme local y falla si divergen.
+      - name: Comprobar tokens
+        run: node scripts/check-tokens.mjs
+        env:
+          SOUL_WEB_CSS: frontend-soul/src/app/globals.css
