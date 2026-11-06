@@ -21,6 +21,14 @@ describe('formatHour', () => {
     expect(formatHour('13:30')).toBe('1:30 PM');
     expect(formatHour('21:00')).toBe('9:00 PM');
   });
+
+  it('devuelve el valor original si la hora no es válida', () => {
+    // Antes se pintaba "1:70 PM" o "NaN:undefined AM".
+    expect(formatHour('25:70')).toBe('25:70');
+    expect(formatHour('24:00')).toBe('24:00');
+    expect(formatHour('sin-hora')).toBe('sin-hora');
+    expect(formatHour('')).toBe('');
+  });
 });
 
 describe('formatLongDate', () => {

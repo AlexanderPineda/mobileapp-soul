@@ -14,8 +14,14 @@ import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { formatHour, formatLongDate, hasStarted } from '../utils/format';
+import { isValidEmail, isValidPhone, normalizeEmail } from '../utils/validation';
 import type { PublicAppointment } from '../types';
 import type { ScreenProps } from '../navigation/types';
+
+/** Errores por campo del formulario. */
+type FieldErrors = Partial<
+  Record<'firstName' | 'lastName' | 'email' | 'phone', string>
+>;
 
 export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const {
@@ -38,6 +44,8 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const [lastName, setLastName] = useState(patientLastName);
   const [email, setEmail] = useState(patientEmail);
   const [phone, setPhone] = useState(patientPhone ?? '');
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  /** Error de la llamada al backend, no de un campo concreto. */
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -47,23 +55,39 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const startAsDate = new Date(startISO);
   const endAsDate = new Date(startAsDate.getTime() + duration * 60_000);
 
-  const handleSubmit = async () => {
-    if (!firstName.trim()) {
-      setError('Ingresa tu nombre');
-      return;
-    }
-    if (!lastName.trim()) {
-      setError('Ingresa tu apellido');
-      return;
-    }
+  /** Al escribir en un campo se limpia su error para no dejar mensajes rancios. */
+  const clearFieldError = (field: keyof FieldErrors) => {
+    setFieldErrors((prev) =>
+      prev[field] ? { ...prev, [field]: undefined } : prev,
+    );
+  };
+
+  const validate = (): FieldErrors => {
+    const next: FieldErrors = {};
+
+    if (!firstName.trim()) next.firstName = 'Ingresa tu nombre';
+    if (!lastName.trim()) next.lastName = 'Ingresa tu apellido';
+
     if (!email.trim()) {
-      setError('Ingresa tu correo');
-      return;
+      next.email = 'Ingresa tu correo';
+    } else if (!isValidEmail(email)) {
+      next.email = 'Ingresa un correo válido';
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Ingresa un correo válido');
-      return;
+
+    if (phone.trim() && !isValidPhone(phone)) {
+      next.phone = 'Ingresa un teléfono válido (mínimo 7 dígitos)';
     }
+
+    return next;
+  };
+
+  const handleSubmit = async () => {
+    const nextErrors = validate();
+    setFieldErrors(nextErrors);
+    setError(null);
+
+    if (Object.keys(nextErrors).length > 0) return;
+
     if (hasStarted(startISO)) {
       setError('Ese horario ya pasó. Vuelve atrás y elige otro, por favor.');
       return;
@@ -78,7 +102,8 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
         {
           patientFirstName: firstName.trim(),
           patientLastName: lastName.trim(),
-          patientEmail: email.trim(),
+          // Normalizado: el backend identifica al paciente por email exacto.
+          patientEmail: normalizeEmail(email),
           patientPhone: phone.trim() || undefined,
           serviceType,
           centerId,
@@ -145,7 +170,11 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           <Input
             label="Nombre"
             value={firstName}
-            onChangeText={setFirstName}
+            onChangeText={(value) => {
+              setFirstName(value);
+              clearFieldError('firstName');
+            }}
+            error={fieldErrors.firstName}
             placeholder="Tu nombre"
             autoComplete="given-name"
             textContentType="givenName"
@@ -153,7 +182,11 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           <Input
             label="Apellido"
             value={lastName}
-            onChangeText={setLastName}
+            onChangeText={(value) => {
+              setLastName(value);
+              clearFieldError('lastName');
+            }}
+            error={fieldErrors.lastName}
             placeholder="Tu apellido"
             autoComplete="family-name"
             textContentType="familyName"
@@ -161,17 +194,26 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           <Input
             label="Correo"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(value) => {
+              setEmail(value);
+              clearFieldError('email');
+            }}
+            error={fieldErrors.email}
             placeholder="tu@correo.com"
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
             autoComplete="email"
             textContentType="emailAddress"
           />
           <Input
             label="Teléfono"
             value={phone}
-            onChangeText={setPhone}
+            onChangeText={(value) => {
+              setPhone(value);
+              clearFieldError('phone');
+            }}
+            error={fieldErrors.phone}
             placeholder="Opcional"
             keyboardType="phone-pad"
             autoComplete="tel"

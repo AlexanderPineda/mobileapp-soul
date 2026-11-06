@@ -24,6 +24,9 @@ export function Input({
       <Text style={styles.label}>{label}</Text>
       <TextInput
         {...props}
+        // Sin esto el lector de pantalla anuncia el campo sin su nombre: la
+        // etiqueta es un `Text` hermano y no un `label` real de formulario.
+        accessibilityLabel={props.accessibilityLabel ?? label}
         style={[
           styles.input,
           style,
@@ -31,7 +34,11 @@ export function Input({
         ]}
         placeholderTextColor={colors.textSecondary}
       />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text style={styles.error} accessibilityLiveRegion="polite">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }

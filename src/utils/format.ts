@@ -26,11 +26,19 @@ export function hasStarted(
 }
 
 export function formatHour(hour: string): string {
-  const [h, m] = hour.split(':');
-  const hoursNum = Number(h);
+  const match = /^(\d{1,2}):(\d{2})$/.exec(hour.trim());
+
+  // Ante un formato inesperado se devuelve el original: mejor mostrar lo que
+  // llegó que inventar algo como "1:70 PM".
+  if (!match) return hour;
+
+  const hoursNum = Number(match[1]);
+  const minutes = match[2];
+  if (hoursNum > 23 || Number(minutes) > 59) return hour;
+
   const period = hoursNum >= 12 ? 'PM' : 'AM';
   const displayHour = hoursNum % 12 || 12;
-  return `${displayHour}:${m} ${period}`;
+  return `${displayHour}:${minutes} ${period}`;
 }
 
 /**
