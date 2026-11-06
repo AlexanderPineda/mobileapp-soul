@@ -6,7 +6,7 @@ import { formatHour } from '../../utils/format';
 
 interface SlotItemProps {
   slot: FreeSlot;
-  onSelect: (time: string) => void;
+  onSelect: (slot: FreeSlot) => void;
 }
 
 export function SlotItem({ slot, onSelect }: SlotItemProps) {
@@ -16,7 +16,7 @@ export function SlotItem({ slot, onSelect }: SlotItemProps) {
   return (
     <TouchableOpacity
       style={[styles.container, count > 0 && styles.available]}
-      onPress={() => onSelect(slot.time)}
+      onPress={() => onSelect(slot)}
       disabled={count === 0}
     >
       <View style={styles.timeRow}>

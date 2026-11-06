@@ -21,13 +21,3 @@ export const API_BASE_URL =
   (Platform.OS === 'android' ? 'http://10.0.2.2:777/api' : 'http://localhost:777/api');
 
 export const API_TIMEOUT_MS = 30_000;
-
-/**
- * Offset de zona horaria del servidor (en minutos, con signo inverso).
- * Ejemplo: -300 (UTC-5) para Colombia.
- *
- * IMPORTANTE: revisa y ajusta este valor según la zona horaria del
- * backend en producción. Se usa para construir timestamps ISO con
- * desplazamiento al enviar citas.
- */
-export const SERVER_TIME_ZONE_OFFSET_MINUTES = -300;

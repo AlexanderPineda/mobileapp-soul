@@ -16,48 +16,20 @@ export function toISOTime(date: Date): string {
 }
 
 /**
- * Construye el instante UTC ISO 8601 que corresponde a una hora de pared
- * (hora local del centro) en una fecha concreta.
+ * ¿El instante ISO ya pasó (o es justo ahora)?
  *
- * El backend interpreta y compara los horarios de disponibilidad con la hora
- * local del servidor (ver `formatHHMM` en `availability.service.ts`), por lo
- * que hay que enviar el instante UTC que representa esa hora de pared en la
- * zona horaria del servidor.
- *
- * @param date        Fecha del slot (se usa su parte UTC, que corresponde
- *                    exactamente al día elegido en el calendario).
- * @param hour        Hora de pared en formato 'HH:MM'.
- * @param offsetMinutes Desplazamiento de la zona horaria del servidor respecto
- *                    a UTC, en minutos con signo (ej. -300 para UTC-5).
- *
- * Ejemplo (UTC-5): 22/10/2026 09:00 -> 2026-10-22T14:00:00.000Z
+ * Se usa como guarda de UI: el backend ya no devuelve horarios pasados, pero el
+ * listado puede quedar obsoleto si la pantalla lleva rato abierta. Un valor
+ * inclasificable se considera pasado para no ofrecer una reserva inválida.
  */
-export function toISODateTime(
-  date: Date,
-  hour: string,
-  offsetMinutes = 0,
-): string {
-  const [hours, minutes] = hour.split(':');
-
-  // Medianoche UTC del día elegido: Date.UTC ignora la zona horaria local.
-  const dayStartUtc = Date.UTC(
-    date.getUTCFullYear(),
-    date.getUTCMonth(),
-    date.getUTCDate(),
-  );
-
-  const wallClockUtc =
-    dayStartUtc + Number(hours) * 60 * 60_000 + Number(minutes) * 60_000;
-
-  // La hora de pared está expresada en la zona del servidor, así que se
-  // descuenta el offset para obtener el instante UTC real.
-  const instant = wallClockUtc - offsetMinutes * 60_000;
-
-  return new Date(instant).toISOString();
+export function hasStarted(
+  isoDateTime: string,
+  now: Date = new Date(),
+): boolean {
+  const start = new Date(isoDateTime).getTime();
+  if (Number.isNaN(start)) return true;
+  return start <= now.getTime();
 }
-
-/** Alias de `toISODateTime` usado en la pantalla de reserva. */
-export const buildISODateTime = toISODateTime;
 
 export function formatHour(hour: string): string {
   const [h, m] = hour.split(':');

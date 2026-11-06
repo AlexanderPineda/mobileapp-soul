@@ -30,6 +30,8 @@ export type RootStackParamList = {
     date: string;
     duration: number;
     time: string;
+    /** Instante exacto del slot en ISO 8601 (UTC), tal como lo devuelve el backend. */
+    startTime: string;
     staffProfileId?: string;
     /** Valor exacto del servicio que espera el backend (`ServiceType`). */
     serviceType: string;

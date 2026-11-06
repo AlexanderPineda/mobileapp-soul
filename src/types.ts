@@ -93,7 +93,10 @@ export interface Appointment {
 }
 
 export interface FreeSlot {
-  time: string; // 'HH:MM'
+  /** Hora de pared del centro (`HH:MM`), tal como se muestra al paciente. */
+  time: string;
+  /** Instante exacto de inicio en ISO 8601 (UTC), calculado por el backend. */
+  startTime: string;
   staffProfileIds: string[];
 }
 

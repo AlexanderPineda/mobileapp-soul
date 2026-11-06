@@ -5,8 +5,7 @@ import { api } from '../api/apiClient';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { colors, spacing, typography } from '../styles/theme';
-import { buildISODateTime, formatHour, formatLongDate } from '../utils/format';
-import { SERVER_TIME_ZONE_OFFSET_MINUTES } from '../config';
+import { formatHour, formatLongDate, hasStarted } from '../utils/format';
 import type { PublicAppointment } from '../types';
 import type { ScreenProps } from '../navigation/types';
 
@@ -17,6 +16,7 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
     date,
     duration,
     time,
+    startTime,
     staffProfileId,
     serviceType,
     serviceLabel,
@@ -33,11 +33,9 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const startISO = buildISODateTime(
-    new Date(date),
-    time,
-    SERVER_TIME_ZONE_OFFSET_MINUTES,
-  );
+  // `startTime` es el instante exacto que calculó el backend con la zona horaria
+  // IANA del centro (`Center.timezone`), así que aquí no hay que reconstruirlo.
+  const startISO = startTime;
   const startAsDate = new Date(startISO);
   const endAsDate = new Date(startAsDate.getTime() + duration * 60_000);
 
@@ -56,6 +54,10 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Ingresa un correo válido');
+      return;
+    }
+    if (hasStarted(startISO)) {
+      setError('Ese horario ya pasó. Vuelve atrás y elige otro, por favor.');
       return;
     }
 

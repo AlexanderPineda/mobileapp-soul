@@ -8,7 +8,7 @@ import { SERVICE_TYPES } from '../types';
 import { SlotItem } from '../components/availability/SlotItem';
 import { EmptyState } from '../components/common/EmptyState';
 import { colors, spacing, typography } from '../styles/theme';
-import { formatDate, toISODate } from '../utils/format';
+import { formatDate, hasStarted, toISODate } from '../utils/format';
 import type { ScreenProps } from '../navigation/types';
 
 export function AvailabilityScreen({
@@ -39,7 +39,10 @@ export function AvailabilityScreen({
         modality,
         staffProfileId: preselectedStaffProfileId,
       });
-      setSlots(result.slots ?? []);
+      // El backend ya descarta el pasado; se filtra otra vez por si el listado
+      // queda obsoleto mientras la pantalla está abierta.
+      const now = new Date();
+      setSlots((result.slots ?? []).filter((slot) => !hasStarted(slot.startTime, now)));
     } catch (err: unknown) {
       setError((err as Error).message);
       setSlots([]);
@@ -126,13 +129,14 @@ export function AvailabilityScreen({
           renderItem={({ item }) => (
             <SlotItem
               slot={item}
-              onSelect={(time) =>
+              onSelect={(slot) =>
                 navigation.navigate('Booking', {
                   centerId,
                   modality,
                   date,
                   duration,
-                  time,
+                  time: slot.time,
+                  startTime: slot.startTime,
                   staffProfileId: preselectedStaffProfileId,
                   serviceType: serviceType.value,
                   serviceLabel: serviceType.label,

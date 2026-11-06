@@ -126,9 +126,12 @@ El simulador **sí** alcanza `localhost` del host, por eso usa
 Centro: **Centro Demo Norte** → terapeuta **Ana Ruiz** → servicio
 **Terapia Familiar** (60 min, Presencial).
 
-Los horarios se generan en la zona horaria del servidor (UTC-5, Colombia).
-`SERVER_TIME_ZONE_OFFSET_MINUTES = -300` en `src/config.ts` se usa para
-construir el `startTime` ISO que se envía al backend.
+Los horarios se calculan en el backend con la zona horaria **IANA de cada centro**
+(`Center.timezone`, por defecto `America/Bogota`). El endpoint
+`/public/availability/slots` devuelve, por cada slot, la hora de pared (`time`,
+`HH:MM`) y el instante exacto en ISO 8601 UTC (`startTime`). La app envía ese
+`startTime` tal cual al crear la cita, sin reconstruirlo en el cliente, y el
+backend descarta los horarios que ya empezaron.
 
 ---
 

@@ -2,6 +2,7 @@ import {
   formatDate,
   formatHour,
   formatLongDate,
+  hasStarted,
   isToday,
   toISODate,
   toISOTime,
@@ -50,5 +51,22 @@ describe('isToday', () => {
   it('detecta el día actual', () => {
     expect(isToday(new Date())).toBe(true);
     expect(isToday(new Date(2020, 0, 1))).toBe(false);
+  });
+});
+
+describe('hasStarted', () => {
+  const now = new Date('2026-11-06T15:00:00.000Z');
+
+  it('marca como pasados los instantes anteriores o iguales a ahora', () => {
+    expect(hasStarted('2026-11-06T14:59:00.000Z', now)).toBe(true);
+    expect(hasStarted('2026-11-06T15:00:00.000Z', now)).toBe(true);
+  });
+
+  it('deja pasar los instantes futuros', () => {
+    expect(hasStarted('2026-11-06T15:01:00.000Z', now)).toBe(false);
+  });
+
+  it('considera pasado un valor que no se puede interpretar', () => {
+    expect(hasStarted('no es una fecha', now)).toBe(true);
   });
 });
