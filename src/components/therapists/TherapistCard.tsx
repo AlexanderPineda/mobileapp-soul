@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { StaffProfile } from '../../types';
+import { useI18n } from '../../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 
 interface TherapistCardProps {
@@ -9,10 +10,11 @@ interface TherapistCardProps {
 }
 
 export function TherapistCard({ therapist, onSelect }: TherapistCardProps) {
+  const { t } = useI18n();
   const initials =
     `${therapist.user?.firstName?.[0] ?? ''}${therapist.user?.lastName?.[0] ?? ''}`.toUpperCase();
   const name = `${therapist.user?.firstName ?? ''} ${therapist.user?.lastName ?? ''}`.trim();
-  const displayName = name || 'Terapeuta';
+  const displayName = name || t('therapists.fallbackName');
   const specialty = therapist.specialty;
 
   return (
@@ -24,7 +26,7 @@ export function TherapistCard({ therapist, onSelect }: TherapistCardProps) {
       accessibilityLabel={
         specialty ? `${displayName}, ${specialty}` : displayName
       }
-      accessibilityHint="Ver sus horarios disponibles"
+      accessibilityHint={t('therapists.cardHint')}
     >
       <View style={styles.avatarRow}>
         {/* El avatar es decorativo: el nombre ya va en la etiqueta. */}

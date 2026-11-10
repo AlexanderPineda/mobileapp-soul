@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import { getErrorMessage } from '../api/errors';
-import { createPaymentPreference } from '../api/payments';
+import { createPaymentPreference, markPaymentFailed } from '../api/payments';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { useI18n } from '../i18n/I18nProvider';
@@ -25,8 +25,19 @@ type FieldErrors = Partial<
   Record<'firstName' | 'lastName' | 'email' | 'phone', string>
 >;
 
+/**
+ * Libera la reserva temporal de un pago que no llegó a pagarse.
+ *
+ * Se usa cuando el checkout no se puede abrir: el backend ya tomó el horario
+ * (15 minutos) y, sin esto, el paciente vería su propio horario como ocupado al
+ * reintentar. Es best-effort: si la llamada falla, la reserva caduca sola.
+ */
+async function releaseHold(paymentId: string): Promise<void> {
+  await markPaymentFailed(paymentId).catch(() => undefined);
+}
+
 export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
-  const { t, formatLongDate } = useI18n();
+  const { t, formatLongDate, formatAmount } = useI18n();
   const {
     centerId,
     modality,
@@ -37,6 +48,8 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
     staffProfileId,
     serviceType,
     serviceLabel,
+    price,
+    currency,
     patientName,
     patientLastName,
     patientEmail,
@@ -138,13 +151,22 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           preference.init_point ?? preference.sandbox_init_point;
 
         if (!checkoutUrl) {
+          // La reserva ya está creada en el backend: si no hay checkout que
+          // abrir hay que liberarla o el horario queda bloqueado 15 minutos y
+          // el paciente no puede volver a intentarlo.
+          await releaseHold(preference.id);
           throw new Error(t('booking.checkoutUnavailable'));
         }
 
-        // Se abre el checkout en el navegador del sistema: la app no puede
-        // incrustar Mercado Pago sin una dependencia nativa, y el paciente
-        // vuelve solo cuando termina. El estado real lo confirma `Payment`.
-        await Linking.openURL(checkoutUrl);
+        try {
+          // Se abre el checkout en el navegador del sistema: la app no puede
+          // incrustar Mercado Pago sin una dependencia nativa, y el paciente
+          // vuelve solo cuando termina. El estado real lo confirma `Payment`.
+          await Linking.openURL(checkoutUrl);
+        } catch {
+          await releaseHold(preference.id);
+          throw new Error(t('booking.checkoutUnavailable'));
+        }
       }
 
       // `replace` saca el formulario del stack: volver atrás después de pagar no
@@ -196,6 +218,14 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
               ? t('modality.virtual')
               : t('modality.onsite')}
           </Text>
+          {typeof price === 'number' ? (
+            <>
+              <Text style={styles.summaryLabel}>{t('booking.total')}</Text>
+              <Text style={styles.totalValue}>
+                {formatAmount(price, currency)}
+              </Text>
+            </>
+          ) : null}
         </View>
 
         <View style={styles.fields}>
@@ -298,6 +328,11 @@ const styles = StyleSheet.create({
     ...typography.body,
     fontWeight: '600',
     color: colors.text,
+  },
+  /** El monto que se cobra: mismo tamaño que el título para que se lea primero. */
+  totalValue: {
+    ...typography.h3,
+    color: colors.primary,
   },
   fields: { gap: spacing.sm },
   notice: {

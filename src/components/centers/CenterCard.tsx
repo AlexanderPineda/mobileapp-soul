@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Center } from '../../types';
+import { useI18n } from '../../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 
 interface CenterCardProps {
@@ -9,14 +10,16 @@ interface CenterCardProps {
 }
 
 export function CenterCard({ center, onSelect }: CenterCardProps) {
+  const { t } = useI18n();
+
   return (
     <TouchableOpacity
       onPress={() => onSelect(center)}
       style={styles.card}
       activeOpacity={0.8}
       accessibilityRole="button"
-      accessibilityLabel={`Ver terapeutas de ${center.name}`}
-      accessibilityHint="Abre la lista de terapeutas del centro"
+      accessibilityLabel={t('centers.cardLabel', { center: center.name })}
+      accessibilityHint={t('centers.cardHint')}
     >
       {/* Emoji decorativo: se oculta para que el lector no lea "marcador". */}
       <View

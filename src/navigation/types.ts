@@ -30,6 +30,9 @@ export interface BookingParams {
   serviceType: string;
   /** Etiqueta legible del servicio, para mostrar en la pantalla. */
   serviceLabel: string;
+  /** Precio del catálogo al momento de reservar (informativo). */
+  price?: number;
+  currency?: string;
   patientName: string;
   patientLastName: string;
   patientEmail: string;

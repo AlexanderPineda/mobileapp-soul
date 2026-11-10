@@ -19,7 +19,6 @@ const es = {
   // ============================== Comunes ==============================
   'common.retry': 'Reintentar',
   'common.backHome': 'Volver al inicio',
-  'common.cancel': 'Cancelar',
 
   // ============================== Idioma ==============================
   'language.change': 'Cambiar el idioma',
@@ -59,10 +58,31 @@ const es = {
   'availability.emptyTitle': 'No hay horarios disponibles',
   'availability.emptyDescription': 'Intenta otro día o cambia el servicio.',
   'availability.loading': 'Cargando horarios…',
+  'availability.loadingServices': 'Cargando servicios…',
+  'availability.servicesErrorTitle': 'No pudimos cargar los servicios',
+  'availability.noServicesTitle': 'Aún no hay servicios disponibles',
+  'availability.noServicesDescription':
+    'Comunícate con el centro para conocer su oferta de servicios.',
 
   // ============================== Modalidad ==============================
   'modality.virtual': 'Virtual',
   'modality.onsite': 'Presencial',
+
+  // ============================== Slots ==============================
+  'slots.availableOne': '1 terapeuta disponible',
+  'slots.availableMany': '{count} terapeutas disponibles',
+  'slots.hint': 'Toque para reservar',
+
+  // ============================== Tarjetas ==============================
+  'centers.cardLabel': 'Ver terapeutas de {center}',
+  'centers.cardHint': 'Abre la lista de terapeutas del centro',
+  'therapists.fallbackName': 'Terapeuta',
+  'therapists.cardHint': 'Ver sus horarios disponibles',
+
+  // ============================== Error de render ==============================
+  'errorBoundary.title': 'Algo salió mal',
+  'errorBoundary.description':
+    'Tuvimos un problema al mostrar esta pantalla. Puedes intentarlo de nuevo.',
 
   // ============================== Reserva ==============================
   'booking.screenTitle': 'Reservar sesión',
@@ -83,6 +103,7 @@ const es = {
   'booking.paymentNotice':
     'El pago se hace antes de confirmar la cita. Al continuar te llevamos a la pasarela segura.',
   'booking.checkoutUnavailable': 'No pudimos abrir la pasarela de pago. Inténtalo de nuevo.',
+  'booking.total': 'Total a pagar',
 
   // ============================== Pago ==============================
   'payment.screenTitle': 'Pago',
@@ -139,7 +160,6 @@ const en: Record<keyof typeof es, string> = {
   // ============================== Common ==============================
   'common.retry': 'Try again',
   'common.backHome': 'Back to home',
-  'common.cancel': 'Cancel',
 
   // ============================== Language ==============================
   'language.change': 'Change language',
@@ -179,10 +199,31 @@ const en: Record<keyof typeof es, string> = {
   'availability.emptyTitle': 'No times available',
   'availability.emptyDescription': 'Try another day or a different service.',
   'availability.loading': 'Loading times…',
+  'availability.loadingServices': 'Loading services…',
+  'availability.servicesErrorTitle': "We couldn't load the services",
+  'availability.noServicesTitle': 'No services available yet',
+  'availability.noServicesDescription':
+    'Contact the centre to find out which services it offers.',
 
   // ============================== Modality ==============================
   'modality.virtual': 'Virtual',
   'modality.onsite': 'In person',
+
+  // ============================== Slots ==============================
+  'slots.availableOne': '1 therapist available',
+  'slots.availableMany': '{count} therapists available',
+  'slots.hint': 'Tap to book',
+
+  // ============================== Cards ==============================
+  'centers.cardLabel': 'See therapists at {center}',
+  'centers.cardHint': "Opens the centre's therapist list",
+  'therapists.fallbackName': 'Therapist',
+  'therapists.cardHint': 'See their available times',
+
+  // ============================== Render error ==============================
+  'errorBoundary.title': 'Something went wrong',
+  'errorBoundary.description':
+    'We had a problem showing this screen. You can try again.',
 
   // ============================== Booking ==============================
   'booking.screenTitle': 'Book a session',
@@ -203,6 +244,7 @@ const en: Record<keyof typeof es, string> = {
   'booking.paymentNotice':
     'Payment happens before the appointment is confirmed. We take you to the secure checkout next.',
   'booking.checkoutUnavailable': "We couldn't open the checkout. Please try again.",
+  'booking.total': 'Total to pay',
 
   // ============================== Payment ==============================
   'payment.screenTitle': 'Payment',

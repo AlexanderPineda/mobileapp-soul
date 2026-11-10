@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from './Button';
+import { getRequestLocale } from '../../i18n/locale';
+import { translate } from '../../i18n/messages';
 import { colors, spacing, typography } from '../../styles/theme';
 
 interface ErrorBoundaryProps {
@@ -48,12 +50,21 @@ export class ErrorBoundary extends React.Component<
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Algo salió mal</Text>
-        <Text style={styles.description}>
-          Tuvimos un problema al mostrar esta pantalla. Puedes intentarlo de
-          nuevo.
+        {/*
+          Este componente envuelve al `I18nProvider` (si falla el render no hay
+          contexto que leer), así que traduce con la función pura y el idioma que
+          quedó en el store del cliente HTTP.
+        */}
+        <Text style={styles.title}>
+          {translate(getRequestLocale(), 'errorBoundary.title')}
         </Text>
-        <Button title="Reintentar" onPress={this.handleRetry} />
+        <Text style={styles.description}>
+          {translate(getRequestLocale(), 'errorBoundary.description')}
+        </Text>
+        <Button
+          title={translate(getRequestLocale(), 'common.retry')}
+          onPress={this.handleRetry}
+        />
       </View>
     );
   }

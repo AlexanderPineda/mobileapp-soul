@@ -4,13 +4,18 @@ import { Picker } from '@react-native-picker/picker';
 
 import { api } from '../api/apiClient';
 import { getErrorMessage } from '../api/errors';
-import { FreeSlot, FreeSlotsResult } from '../types';
-import { SERVICE_TYPES } from '../types';
+import type {
+  CatalogService,
+  FreeSlot,
+  FreeSlotsResult,
+  ServiceTypeOption,
+} from '../types';
 import { SlotItem } from '../components/availability/SlotItem';
 import { EmptyState } from '../components/common/EmptyState';
 import { useI18n } from '../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { hasStarted, toISODate } from '../utils/format';
+import { toServiceOptions } from '../utils/service-catalog';
 import type { ScreenProps } from '../navigation/types';
 
 export function AvailabilityScreen({
@@ -18,7 +23,13 @@ export function AvailabilityScreen({
   navigation,
 }: ScreenProps<'Availability'>) {
   const { centerId, staffProfileId: preselectedStaffProfileId } = route.params;
-  const { t, formatDate } = useI18n();
+  const { t, formatDate, formatAmount } = useI18n();
+
+  const [services, setServices] = useState<ServiceTypeOption[]>([]);
+  const [servicesStatus, setServicesStatus] = useState<
+    'loading' | 'ready' | 'empty' | 'error'
+  >('loading');
+  const [servicesError, setServicesError] = useState<string | null>(null);
 
   const [date, setDate] = useState<string>(() => toISODate(new Date()));
   const [serviceTypeIndex, setServiceTypeIndex] = useState(0);
@@ -32,12 +43,45 @@ export function AvailabilityScreen({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const serviceType = SERVICE_TYPES[serviceTypeIndex];
+  /**
+   * Catálogo desde el backend.
+   *
+   * Antes había una lista fija de cuatro servicios y uno de ellos no existía en
+   * la base: al pagar, el backend respondía 400 "El servicio seleccionado no
+   * está disponible". Con el catálogo, lo que se ofrece es exactamente lo que se
+   * puede cobrar, y un servicio nuevo aparece sin publicar la app de nuevo.
+   */
+  const loadServices = useCallback(async () => {
+    setServicesStatus('loading');
+    setServicesError(null);
+
+    try {
+      const catalog = await api.get<CatalogService[]>('/services/active');
+      const options = toServiceOptions(catalog);
+
+      setServices(options);
+      setServiceTypeIndex(0);
+      setServicesStatus(options.length > 0 ? 'ready' : 'empty');
+    } catch (err: unknown) {
+      setServicesError(getErrorMessage(err, t));
+      setServices([]);
+      setServicesStatus('error');
+    }
+  }, [t]);
+
+  useEffect(() => {
+    loadServices();
+  }, [loadServices]);
+
+  const serviceType = services[serviceTypeIndex];
   // La modalidad y la duración dependen del servicio elegido.
-  const modality = serviceType.modality;
-  const duration = serviceType.durationMinutes;
+  const modality = serviceType?.modality ?? 'PRESENCIAL';
+  const duration = serviceType?.durationMinutes ?? 45;
 
   const loadSlots = useCallback(async () => {
+    // Sin catálogo todavía no hay servicio ni duración que consultar.
+    if (!serviceType) return;
+
     setLoading(true);
     setError(null);
     try {
@@ -59,11 +103,19 @@ export function AvailabilityScreen({
     } finally {
       setLoading(false);
     }
-  }, [date, duration, centerId, modality, preselectedStaffProfileId, t]);
+  }, [
+    date,
+    duration,
+    centerId,
+    modality,
+    preselectedStaffProfileId,
+    serviceType,
+    t,
+  ]);
 
   useEffect(() => {
-    loadSlots();
-  }, [loadSlots]);
+    if (serviceType) loadSlots();
+  }, [serviceType, loadSlots]);
 
   const nextDays = useMemo(() => {
     const base = new Date();
@@ -74,6 +126,10 @@ export function AvailabilityScreen({
     });
   }, [formatDate]);
 
+  /** El precio se muestra porque se cobra antes de confirmar la cita. */
+  const serviceLabelWithPrice = (option: ServiceTypeOption) =>
+    `${option.label} · ${formatAmount(option.price, option.currency)}`;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -81,93 +137,122 @@ export function AvailabilityScreen({
         <Text style={styles.subtitle}>{t('availability.subtitle')}</Text>
       </View>
 
-      <View style={styles.pickerSection}>
-        <Text style={styles.label}>{t('availability.service')}</Text>
-        <Picker
-          selectedValue={String(serviceTypeIndex)}
-          onValueChange={(itemValue: string) => {
-            setServiceTypeIndex(Number(itemValue));
-          }}
-          style={styles.picker}
-        >
-          {SERVICE_TYPES.map((st, idx) => (
-            <Picker.Item key={st.value} label={st.label} value={String(idx)} />
-          ))}
-        </Picker>
-      </View>
-
-      <View style={styles.pickerSection}>
-        <Text style={styles.label}>{t('availability.day')}</Text>
-        <Picker
-          selectedValue={date}
-          onValueChange={(itemValue: string) => setDate(itemValue)}
-          style={styles.picker}
-        >
-          {nextDays.map((d) => (
-            <Picker.Item key={d.value} label={d.label} value={d.value} />
-          ))}
-        </Picker>
-      </View>
-
-      <Text style={styles.info}>
-        {t('availability.info', {
-          service: serviceType.label,
-          duration,
-          modality:
-            modality === 'VIRTUAL'
-              ? t('modality.virtual')
-              : t('modality.onsite'),
-        })}
-      </Text>
-
-      {error ? (
+      {servicesStatus === 'error' ? (
         <EmptyState
-          title={t('availability.errorTitle')}
-          description={error}
+          title={t('availability.servicesErrorTitle')}
+          description={servicesError ?? undefined}
           actionLabel={t('common.retry')}
-          onAction={loadSlots}
+          onAction={loadServices}
         />
-      ) : loading ? (
-        <View style={styles.loading}>
-          <Text style={styles.loadingText}>{t('availability.loading')}</Text>
-        </View>
-      ) : !configured ? (
+      ) : servicesStatus === 'empty' ? (
         <EmptyState
-          title={t('availability.notConfiguredTitle')}
-          description={t('availability.notConfiguredDescription')}
-        />
-      ) : slots.length === 0 ? (
-        <EmptyState
-          title={t('availability.emptyTitle')}
-          description={t('availability.emptyDescription')}
+          title={t('availability.noServicesTitle')}
+          description={t('availability.noServicesDescription')}
         />
       ) : (
-        <FlatList
-          data={slots}
-          keyExtractor={(item) => item.time}
-          renderItem={({ item }) => (
-            <SlotItem
-              slot={item}
-              onSelect={(slot) =>
-                navigation.navigate('Booking', {
-                  centerId,
-                  modality,
-                  date,
-                  duration,
-                  time: slot.time,
-                  startTime: slot.startTime,
-                  staffProfileId: preselectedStaffProfileId,
-                  serviceType: serviceType.value,
-                  serviceLabel: serviceType.label,
-                  patientName: '',
-                  patientLastName: '',
-                  patientEmail: '',
-                })
-              }
+        <>
+          <View style={styles.pickerSection}>
+            <Text style={styles.label}>{t('availability.service')}</Text>
+            <Picker
+              selectedValue={String(serviceTypeIndex)}
+              onValueChange={(itemValue: string) => {
+                setServiceTypeIndex(Number(itemValue));
+              }}
+              style={styles.picker}
+              enabled={servicesStatus === 'ready'}
+            >
+              {services.map((st, idx) => (
+                <Picker.Item
+                  key={st.value}
+                  label={serviceLabelWithPrice(st)}
+                  value={String(idx)}
+                />
+              ))}
+            </Picker>
+          </View>
+
+          <View style={styles.pickerSection}>
+            <Text style={styles.label}>{t('availability.day')}</Text>
+            <Picker
+              selectedValue={date}
+              onValueChange={(itemValue: string) => setDate(itemValue)}
+              style={styles.picker}
+            >
+              {nextDays.map((d) => (
+                <Picker.Item key={d.value} label={d.label} value={d.value} />
+              ))}
+            </Picker>
+          </View>
+
+          {serviceType ? (
+            <Text style={styles.info}>
+              {t('availability.info', {
+                service: serviceType.label,
+                duration,
+                modality:
+                  modality === 'VIRTUAL'
+                    ? t('modality.virtual')
+                    : t('modality.onsite'),
+              })}
+            </Text>
+          ) : null}
+
+          {error ? (
+            <EmptyState
+              title={t('availability.errorTitle')}
+              description={error}
+              actionLabel={t('common.retry')}
+              onAction={loadSlots}
+            />
+          ) : loading || servicesStatus === 'loading' ? (
+            <View style={styles.loading}>
+              <Text style={styles.loadingText}>
+                {servicesStatus === 'loading'
+                  ? t('availability.loadingServices')
+                  : t('availability.loading')}
+              </Text>
+            </View>
+          ) : !configured ? (
+            <EmptyState
+              title={t('availability.notConfiguredTitle')}
+              description={t('availability.notConfiguredDescription')}
+            />
+          ) : slots.length === 0 || !serviceType ? (
+            <EmptyState
+              title={t('availability.emptyTitle')}
+              description={t('availability.emptyDescription')}
+            />
+          ) : (
+            <FlatList
+              data={slots}
+              keyExtractor={(item) => item.time}
+              renderItem={({ item }) => (
+                <SlotItem
+                  slot={item}
+                  onSelect={(slot) =>
+                    navigation.navigate('Booking', {
+                      centerId,
+                      modality,
+                      date,
+                      duration,
+                      time: slot.time,
+                      startTime: slot.startTime,
+                      staffProfileId: preselectedStaffProfileId,
+                      serviceType: serviceType.value,
+                      serviceLabel: serviceType.label,
+                      price: serviceType.price,
+                      currency: serviceType.currency,
+                      patientName: '',
+                      patientLastName: '',
+                      patientEmail: '',
+                    })
+                  }
+                />
+              )}
+              contentContainerStyle={styles.list}
             />
           )}
-          contentContainerStyle={styles.list}
-        />
+        </>
       )}
     </View>
   );

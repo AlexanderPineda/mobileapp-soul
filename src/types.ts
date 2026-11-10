@@ -4,6 +4,27 @@
 
 export type AvailabilityModality = 'VIRTUAL' | 'PRESENCIAL';
 
+/** Servicio del catálogo (`GET /services/active`). */
+export interface CatalogService {
+  id: string;
+  name: string;
+  description?: string | null;
+  /** Precio en la unidad mínima de `currency` (pesos enteros). */
+  price: number;
+  currency: string;
+}
+
+/** Opción del selector de servicios, ya con lo que necesita el flujo. */
+export interface ServiceTypeOption {
+  /** Nombre exacto del catálogo: es lo que valida el backend al cobrar. */
+  value: string;
+  label: string;
+  durationMinutes: number;
+  modality: AvailabilityModality;
+  price: number;
+  currency: string;
+}
+
 export interface Center {
   id: string;
   name: string;
@@ -43,24 +64,12 @@ export interface FreeSlotsResult {
   slots: FreeSlot[];
 }
 
-// Servicios ofertados. Deben coincidir exactamente con el enum `ServiceType` de
-// `backend-soul` (`create-public-appointment.dto.ts`): el backend rechaza con
-// 400 cualquier otro valor.
-export interface ServiceTypeOption {
-  value: string;
-  label: string;
-  durationMinutes: number;
-  modality: AvailabilityModality;
-}
-
-export const SERVICE_TYPES: ServiceTypeOption[] = [
-  { value: 'Terapia Familiar', label: 'Terapia Familiar', durationMinutes: 60, modality: 'PRESENCIAL' },
-  { value: 'Valoracion inicial', label: 'Valoración inicial', durationMinutes: 90, modality: 'PRESENCIAL' },
-  { value: 'Terapia individual virtual', label: 'Terapia individual virtual', durationMinutes: 45, modality: 'VIRTUAL' },
-  { value: 'Terapia individual presencial', label: 'Terapia individual presencial', durationMinutes: 45, modality: 'PRESENCIAL' },
-];
-
 // La cita ya no se lee de `POST /public/appointments`: la crea el backend al
 // aprobarse el pago y la app recibe solo el resumen que arma
 // `utils/confirmation.ts` a partir de `/payments/status/:id`.
+//
+// El catálogo de servicios tampoco está escrito aquí: se pide a
+// `GET /services/active` y se combina con `utils/service-catalog.ts`. Antes
+// había una lista fija con cuatro nombres, y uno de ellos ("Valoración
+// inicial") no existía en la base: pagar ese servicio devolvía 400.
 

@@ -7,16 +7,27 @@ import { Button } from '../src/components/common/Button';
 import { EmptyState } from '../src/components/common/EmptyState';
 import { CenterCard } from '../src/components/centers/CenterCard';
 import { TherapistCard } from '../src/components/therapists/TherapistCard';
+import { I18nProvider } from '../src/i18n/I18nProvider';
+import { setRequestLocale } from '../src/i18n/locale';
 
 /**
  * Cobertura de los primitivos de UI: son la base de la accesibilidad de la app,
  * así que se verifica que expongan rol, etiqueta y estado al lector de pantalla.
+ *
+ * Las tarjetas leen textos del diccionario, así que se montan dentro de
+ * `I18nProvider`. El idioma se fija en español antes de cada test: en Node el
+ * idioma detectado es el del sistema (`en-US`), y estas aserciones comprueban
+ * los textos del producto original, no la traducción.
  */
+
+beforeEach(() => {
+  setRequestLocale('es');
+});
 
 async function render(element: React.ReactElement): Promise<Renderer> {
   let tree: Renderer | undefined;
   await ReactTestRenderer.act(async () => {
-    tree = ReactTestRenderer.create(element);
+    tree = ReactTestRenderer.create(<I18nProvider>{element}</I18nProvider>);
   });
   return tree!;
 }

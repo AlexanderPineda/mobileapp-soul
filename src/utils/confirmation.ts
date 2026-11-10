@@ -44,6 +44,9 @@ export function buildConfirmation(
     patientEmail: patient.email,
     patientPhone: patient.phone,
     amount: status.amount,
-    currency: 'COP',
+    // El estado del pago no devuelve la moneda, y el catálogo sí la conoce: sin
+    // esto, "Psicoterapia virtual internacional" (USD 50) se mostraría como
+    // "COP 50" en la confirmación.
+    currency: booking.currency ?? 'COP',
   };
 }

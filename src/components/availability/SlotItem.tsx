@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FreeSlot } from '../../types';
+import { useI18n } from '../../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../../styles/theme';
 import { formatHour } from '../../utils/format';
 
@@ -10,25 +11,30 @@ interface SlotItemProps {
 }
 
 export function SlotItem({ slot, onSelect }: SlotItemProps) {
+  const { t } = useI18n();
   const count = slot.staffProfileIds.length;
-  const plural = count !== 1 ? 's' : '';
+
+  // Dos claves en lugar de pluralización ICU: `es` y `en` solo distinguen
+  // singular y plural en esta frase, y así el diccionario sigue siendo plano.
+  const availability =
+    count === 1
+      ? t('slots.availableOne')
+      : t('slots.availableMany', { count });
+  const time = formatHour(slot.time);
 
   return (
     <TouchableOpacity
       style={styles.container}
       onPress={() => onSelect(slot)}
       accessibilityRole="button"
-      accessibilityLabel={`${formatHour(slot.time)}, ${count} terapeuta${
-        count === 1 ? '' : 's'
-      } disponible${count === 1 ? '' : 's'}`}
+      accessibilityLabel={`${time}, ${availability}`}
+      accessibilityHint={t('slots.hint')}
     >
       <View style={styles.timeRow}>
-        <Text style={styles.timeText}>{formatHour(slot.time)}</Text>
-        <Text style={styles.countLabel}>
-          {count} terapeuta{plural} disponible{plural}
-        </Text>
+        <Text style={styles.timeText}>{time}</Text>
+        <Text style={styles.countLabel}>{availability}</Text>
       </View>
-      <Text style={styles.hint}>Toque para reservar</Text>
+      <Text style={styles.hint}>{t('slots.hint')}</Text>
     </TouchableOpacity>
   );
 }
