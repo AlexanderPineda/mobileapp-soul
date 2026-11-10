@@ -8,8 +8,9 @@ import { FreeSlot, FreeSlotsResult } from '../types';
 import { SERVICE_TYPES } from '../types';
 import { SlotItem } from '../components/availability/SlotItem';
 import { EmptyState } from '../components/common/EmptyState';
+import { useI18n } from '../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../styles/theme';
-import { formatDate, hasStarted, toISODate } from '../utils/format';
+import { hasStarted, toISODate } from '../utils/format';
 import type { ScreenProps } from '../navigation/types';
 
 export function AvailabilityScreen({
@@ -17,6 +18,7 @@ export function AvailabilityScreen({
   navigation,
 }: ScreenProps<'Availability'>) {
   const { centerId, staffProfileId: preselectedStaffProfileId } = route.params;
+  const { t, formatDate } = useI18n();
 
   const [date, setDate] = useState<string>(() => toISODate(new Date()));
   const [serviceTypeIndex, setServiceTypeIndex] = useState(0);
@@ -52,12 +54,12 @@ export function AvailabilityScreen({
       setConfigured(result.configured);
       setSlots((result.slots ?? []).filter((slot) => !hasStarted(slot.startTime, now)));
     } catch (err: unknown) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t));
       setSlots([]);
     } finally {
       setLoading(false);
     }
-  }, [date, duration, centerId, modality, preselectedStaffProfileId]);
+  }, [date, duration, centerId, modality, preselectedStaffProfileId, t]);
 
   useEffect(() => {
     loadSlots();
@@ -70,19 +72,17 @@ export function AvailabilityScreen({
       d.setDate(d.getDate() + i);
       return { value: toISODate(d), label: formatDate(d) };
     });
-  }, []);
+  }, [formatDate]);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Horarios disponibles</Text>
-        <Text style={styles.subtitle}>
-          Elige el servicio y el día para ver los horarios libres.
-        </Text>
+        <Text style={styles.title}>{t('availability.title')}</Text>
+        <Text style={styles.subtitle}>{t('availability.subtitle')}</Text>
       </View>
 
       <View style={styles.pickerSection}>
-        <Text style={styles.label}>Servicio</Text>
+        <Text style={styles.label}>{t('availability.service')}</Text>
         <Picker
           selectedValue={String(serviceTypeIndex)}
           onValueChange={(itemValue: string) => {
@@ -97,7 +97,7 @@ export function AvailabilityScreen({
       </View>
 
       <View style={styles.pickerSection}>
-        <Text style={styles.label}>Día</Text>
+        <Text style={styles.label}>{t('availability.day')}</Text>
         <Picker
           selectedValue={date}
           onValueChange={(itemValue: string) => setDate(itemValue)}
@@ -110,30 +110,36 @@ export function AvailabilityScreen({
       </View>
 
       <Text style={styles.info}>
-        Servicio: {serviceType.label} · Duración: {duration} min ·{' '}
-        {modality === 'VIRTUAL' ? 'Virtual' : 'Presencial'}
+        {t('availability.info', {
+          service: serviceType.label,
+          duration,
+          modality:
+            modality === 'VIRTUAL'
+              ? t('modality.virtual')
+              : t('modality.onsite'),
+        })}
       </Text>
 
       {error ? (
         <EmptyState
-          title="No se pudieron cargar los horarios"
+          title={t('availability.errorTitle')}
           description={error}
-          actionLabel="Reintentar"
+          actionLabel={t('common.retry')}
           onAction={loadSlots}
         />
       ) : loading ? (
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>Cargando horarios…</Text>
+          <Text style={styles.loadingText}>{t('availability.loading')}</Text>
         </View>
       ) : !configured ? (
         <EmptyState
-          title="Este centro aún no tiene agenda para este servicio"
-          description="Comunícate con el centro para conocer sus horarios de atención."
+          title={t('availability.notConfiguredTitle')}
+          description={t('availability.notConfiguredDescription')}
         />
       ) : slots.length === 0 ? (
         <EmptyState
-          title="No hay horarios disponibles"
-          description="Intenta otro día o cambia el servicio."
+          title={t('availability.emptyTitle')}
+          description={t('availability.emptyDescription')}
         />
       ) : (
         <FlatList

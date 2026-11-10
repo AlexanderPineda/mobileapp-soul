@@ -1,38 +1,54 @@
 import React from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import { Linking, Share, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '../components/common/Button';
-import { buildGoogleCalendarUrl } from '../utils/googleCalendar';
-import { formatHour, formatLongDate } from '../utils/format';
+import { useI18n } from '../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../styles/theme';
+import { formatHour } from '../utils/format';
+import { buildGoogleCalendarUrl } from '../utils/googleCalendar';
 import type { ScreenProps } from '../navigation/types';
 
 export function ConfirmationScreen({
   route,
   navigation,
 }: ScreenProps<'Confirmation'>) {
-  const { appointment, date, time, patientPhone } = route.params;
+  const { confirmation } = route.params;
+  const { t, formatLongDate, formatAmount } = useI18n();
 
-  const patient = appointment.patient;
-  const fullName = `${patient?.firstName ?? ''} ${patient?.lastName ?? ''}`.trim();
-  const therapist = appointment.staffProfile?.user;
-  const therapistName = `${therapist?.firstName ?? ''} ${therapist?.lastName ?? ''}`.trim();
+  const dateLabel = formatLongDate(confirmation.date);
+  const timeLabel = formatHour(confirmation.time);
+  const dateTimeLabel = t('confirmation.dateTimeValue', {
+    date: dateLabel,
+    time: timeLabel,
+  });
 
-  const handleAddToGoogleCalendar = () => {
+  const handleAddToCalendar = () => {
     const url = buildGoogleCalendarUrl({
-      title: appointment.title || 'Sesión de terapia',
-      startTime: appointment.startTime,
-      endTime: appointment.endTime,
-      description: `Cita confirmada. Paciente: ${fullName}`,
+      title: confirmation.serviceName,
+      startTime: confirmation.startTime,
+      endTime: confirmation.endTime,
+      location: confirmation.centerName,
+      description: t('confirmation.subtitle'),
     });
+
     Linking.openURL(url).catch((err: unknown) =>
       console.error('Error opening Google Calendar:', err),
     );
   };
 
+  const handleShare = () => {
+    Share.share({
+      message: t('confirmation.shareMessage', {
+        service: confirmation.serviceName,
+        date: dateLabel,
+        time: timeLabel,
+      }),
+    }).catch((err: unknown) => console.error('Error sharing:', err));
+  };
+
   const handleDone = () => {
     // Se limpia todo el stack de reserva: volver atrás ya no es posible ni
-    // deseable después de crear la cita.
+    // deseable después de pagar la cita.
     navigation.reset({
       index: 0,
       routes: [{ name: 'MainTabs', params: { screen: 'Home' } }],
@@ -49,57 +65,77 @@ export function ConfirmationScreen({
       >
         <Text style={styles.icon}>✅</Text>
       </View>
-      <Text style={styles.title}>¡Reserva confirmada!</Text>
-      <Text style={styles.subtitle}>
-        Hemos registrado tu solicitud. Un terapeuta revisará los detalles y
-        confirmará tu cita.
+      <Text style={styles.title} accessibilityRole="header">
+        {t('confirmation.title')}
       </Text>
+      <Text style={styles.subtitle}>{t('confirmation.subtitle')}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Paciente</Text>
-        <Text style={styles.value}>{fullName}</Text>
+        <Text style={styles.label}>{t('confirmation.patient')}</Text>
+        <Text style={styles.value}>{confirmation.patientName}</Text>
 
-        <Text style={styles.label}>Correo</Text>
-        <Text style={styles.value}>{patient?.email}</Text>
+        <Text style={styles.label}>{t('confirmation.email')}</Text>
+        <Text style={styles.value}>{confirmation.patientEmail}</Text>
 
-        {patientPhone ? (
+        {confirmation.patientPhone ? (
           <>
-            <Text style={styles.label}>Teléfono</Text>
-            <Text style={styles.value}>{patientPhone}</Text>
+            <Text style={styles.label}>{t('confirmation.phone')}</Text>
+            <Text style={styles.value}>{confirmation.patientPhone}</Text>
           </>
         ) : null}
 
-        <Text style={styles.label}>Fecha y hora</Text>
+        <Text style={styles.label}>{t('confirmation.dateTime')}</Text>
+        <Text style={styles.value}>{dateTimeLabel}</Text>
+
+        <Text style={styles.label}>{t('confirmation.service')}</Text>
+        <Text style={styles.value}>{confirmation.serviceName}</Text>
+
+        <Text style={styles.label}>{t('confirmation.modality')}</Text>
         <Text style={styles.value}>
-          {formatLongDate(date)} a las {formatHour(time)}
+          {confirmation.isVirtual
+            ? t('modality.virtual')
+            : t('modality.onsite')}
         </Text>
 
-        <Text style={styles.label}>Servicio</Text>
-        <Text style={styles.value}>{appointment.title}</Text>
-
-        <Text style={styles.label}>Modalidad</Text>
-        <Text style={styles.value}>
-          {appointment.isVirtual ? 'Virtual' : 'Presencial'}
-        </Text>
-
-        {therapistName ? (
+        {confirmation.therapistName ? (
           <>
-            <Text style={styles.label}>Terapeuta asignado</Text>
-            <Text style={styles.value}>{therapistName}</Text>
+            <Text style={styles.label}>{t('confirmation.therapist')}</Text>
+            <Text style={styles.value}>{confirmation.therapistName}</Text>
+          </>
+        ) : null}
+
+        {confirmation.centerName ? (
+          <>
+            <Text style={styles.label}>{t('confirmation.center')}</Text>
+            <Text style={styles.value}>{confirmation.centerName}</Text>
+          </>
+        ) : null}
+
+        {typeof confirmation.amount === 'number' ? (
+          <>
+            <Text style={styles.label}>{t('confirmation.amount')}</Text>
+            <Text style={styles.value}>
+              {formatAmount(confirmation.amount, confirmation.currency)}
+            </Text>
           </>
         ) : null}
       </View>
 
       <Button
-        title="Agregar a Google Calendar"
+        title={t('confirmation.addToCalendar')}
         variant="secondary"
-        onPress={handleAddToGoogleCalendar}
+        onPress={handleAddToCalendar}
       />
-
-      <Button title="Listo" onPress={handleDone} />
+      <Button
+        title={t('confirmation.share')}
+        variant="ghost"
+        onPress={handleShare}
+      />
+      <Button title={t('confirmation.done')} onPress={handleDone} />
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HomeScreen } from '../screens/HomeScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { useI18n } from '../i18n/I18nProvider';
 import type { MainTabsParamList } from './types';
 import { TabIcon } from './TabIcon';
 import { colors } from '../styles/theme';
@@ -28,6 +29,7 @@ export function MainTabsNavigator() {
    * en los iPhone con home indicator y en Android con navegación por gestos.
    */
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   return (
     <Tab.Navigator
@@ -49,12 +51,12 @@ export function MainTabsNavigator() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{ title: 'Inicio', tabBarIcon: homeIcon }}
+        options={{ title: t('home.tab'), tabBarIcon: homeIcon }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ title: 'Perfil', tabBarIcon: profileIcon }}
+        options={{ title: t('profile.tab'), tabBarIcon: profileIcon }}
       />
     </Tab.Navigator>
   );

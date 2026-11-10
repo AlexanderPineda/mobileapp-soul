@@ -1,6 +1,10 @@
-// ================================
-// Helpers de formato (fechas, horas)
-// ================================
+/**
+ * Helpers de formato (fechas, horas, dinero).
+ *
+ * Las fechas aceptan `locale` porque la app y la web comparten datos: el día del
+ * centro se envía como `YYYY-MM-DD` y se formatea con `Intl`, así que el mismo
+ * valor se lee "viernes, 6 de noviembre de 2026" o "Friday, November 6, 2026".
+ */
 
 export function toISODate(date: Date): string {
   const year = date.getFullYear();
@@ -65,3 +69,28 @@ export function formatDate(date: Date, locale = 'es-CO'): string {
     day: 'numeric',
   });
 }
+
+/**
+ * Monto con la moneda del pago.
+ *
+ * El backend guarda pesos enteros (`Int` en `Payment.amount`), así que se
+ * recortan los decimales: "COP 150.000" en lugar de "COP 150.000,00". Si el
+ * runtime no soporta `Intl.NumberFormat` con moneda, se devuelve un formato
+ * simple en vez de romper la pantalla de confirmación.
+ */
+export function formatAmount(
+  amount: number,
+  currency = 'COP',
+  locale = 'es-CO',
+): string {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${currency} ${amount}`;
+  }
+}
+

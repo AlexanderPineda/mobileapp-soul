@@ -194,16 +194,48 @@ backend descarta los horarios que ya empezaron.
 
 ## 7. Verificación del flujo (validado en Android)
 
-1. **Inicio** → lista de centros (`/public/centers`).
+1. **Inicio** → lista de centros (`/public/centers`). Arriba a la derecha está
+   el selector **ES/EN**.
 2. Centro → **Terapeutas** filtrados por el centro elegido.
 3. Terapeuta → **Horarios disponibles** con selector de servicio, día y slots;
-   cada slot muestra cuántos terapeutas lo tienen libre.
-4. Slot → **Reservar sesión** con el resumen (servicio, duración, modalidad,
-   fecha y hora en hora local).
+   cada slot muestra cuántos terapeutas lo tienen libre. Las franjas **mixtas**
+   del backend llegan aquí sin distinción: el paciente solo elige virtual o
+   presencial.
+4. Slot → **Reservar sesión** con el resumen (servicio, modalidad, fecha y hora
+   en hora local).
 5. Formulario (nombre, apellido, correo, teléfono opcional) →
-   `POST /public/appointments`.
-6. → **¡Reserva confirmada!** con los datos del paciente y opción de
-   *Agregar a Google Calendar*.
+   `POST /payments/create-preference`. **La app nunca llama a
+   `/public/appointments`**: esa ruta crea la cita sin cobro y es justo lo que
+   la web no permite.
+6. Se abre el checkout de Mercado Pago en el navegador del sistema
+   (`init_point`, con `sandbox_init_point` de respaldo).
+7. → **Pago**: sondea `GET /payments/status/:id` cada 4 s hasta que el webhook
+   confirma (`PAID`), falla (`FAILED`/`REFUNDED`/`VOIDED`) o el pago no existe.
+8. → **¡Reserva confirmada!** con la cita que creó el backend, monto cobrado,
+   *Agregar a Google Calendar* y *Compartir la cita*.
+
+### Sin pasarela configurada (`directCreate`)
+
+Si el backend no tiene Mercado Pago, `create-preference` responde
+`directCreate: true` y **ya creó la cita**. La app no abre ningún checkout: va
+directo a **Pago**, que consulta el estado y termina en la confirmación. Es el
+modo que se usa en desarrollo local.
+
+### Pago aprobado sin cita
+
+Si Mercado Pago aprobó el cobro pero la cita quedó en revisión manual,
+`status` llega con `status: "PAID"` y `appointment: null`. La app muestra
+*"Pago recibido, cita en revisión"* en lugar de inventar una confirmación o un
+error: no se pierde el dinero ni se miente al paciente.
+
+### Idioma
+
+El idioma del teléfono elige el de la app al arrancar (`Intl` y, si el runtime
+no lo expone, `AppleLocale` / `I18nManager`). El selector ES/EN lo cambia en
+caliente y `apiClient` manda `Accept-Language` en **todas** las peticiones, así
+que los mensajes de error del backend llegan en el idioma de la pantalla.
+Límite conocido: los mensajes de validación de los DTO del backend siguen en
+español (ver `backend-soul/docs/agent-memory/open-work.md`, ítem 7).
 
 Comprobación en base de datos:
 
@@ -212,7 +244,16 @@ psql -d soul -c "SELECT a.\"title\", a.\"startTime\", a.\"durationMinutes\", \
   a.\"isVirtual\", a.\"status\", p.\"firstName\", p.\"lastName\", p.\"email\" \
   FROM \"Appointment\" a LEFT JOIN \"Patient\" p ON p.id=a.\"patientId\" \
   ORDER BY a.\"createdAt\" DESC LIMIT 3;"
+
+# El pago que originó la cita: debe estar PAID con su reparto.
+psql -d soul -c "SELECT \"status\", \"amount\", \"therapistAmount\", \
+  \"platformAmount\", \"createdAt\" FROM \"Payment\" \
+  ORDER BY \"createdAt\" DESC LIMIT 3;"
 ```
+
+Una reserva hecha desde la app tiene que dejar **las dos filas**: si hay cita sin
+`Payment`, el flujo se saltó el cobro (revisa que la pantalla de reserva esté
+llamando a `create-preference`).
 
 El `startTime` se guarda en UTC: un slot de **08:00** local (UTC-5) queda como
 `13:00` UTC.

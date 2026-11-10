@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -8,14 +9,15 @@ import {
   View,
 } from 'react-native';
 
-import { api } from '../api/apiClient';
 import { getErrorMessage } from '../api/errors';
+import { createPaymentPreference } from '../api/payments';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
+import { useI18n } from '../i18n/I18nProvider';
 import { borderRadius, colors, spacing, typography } from '../styles/theme';
-import { formatHour, formatLongDate, hasStarted } from '../utils/format';
+import { formatHour, hasStarted } from '../utils/format';
 import { isValidEmail, isValidPhone, normalizeEmail } from '../utils/validation';
-import type { PublicAppointment } from '../types';
+import type { ConfirmationPatient } from '../navigation/types';
 import type { ScreenProps } from '../navigation/types';
 
 /** Errores por campo del formulario. */
@@ -24,6 +26,7 @@ type FieldErrors = Partial<
 >;
 
 export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
+  const { t, formatLongDate } = useI18n();
   const {
     centerId,
     modality,
@@ -65,17 +68,17 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const validate = (): FieldErrors => {
     const next: FieldErrors = {};
 
-    if (!firstName.trim()) next.firstName = 'Ingresa tu nombre';
-    if (!lastName.trim()) next.lastName = 'Ingresa tu apellido';
+    if (!firstName.trim()) next.firstName = t('booking.errorFirstName');
+    if (!lastName.trim()) next.lastName = t('booking.errorLastName');
 
     if (!email.trim()) {
-      next.email = 'Ingresa tu correo';
+      next.email = t('booking.errorEmailRequired');
     } else if (!isValidEmail(email)) {
-      next.email = 'Ingresa un correo válido';
+      next.email = t('booking.errorEmailInvalid');
     }
 
     if (phone.trim() && !isValidPhone(phone)) {
-      next.phone = 'Ingresa un teléfono válido (mínimo 7 dígitos)';
+      next.phone = t('booking.errorPhone');
     }
 
     return next;
@@ -89,42 +92,70 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
     if (Object.keys(nextErrors).length > 0) return;
 
     if (hasStarted(startISO)) {
-      setError('Ese horario ya pasó. Vuelve atrás y elige otro, por favor.');
+      setError(t('booking.errorPastSlot'));
       return;
     }
 
     setSubmitting(true);
     setError(null);
 
-    try {
-      const appointment = await api.post<PublicAppointment>(
-        '/public/appointments',
-        {
-          patientFirstName: firstName.trim(),
-          patientLastName: lastName.trim(),
-          // Normalizado: el backend identifica al paciente por email exacto.
-          patientEmail: normalizeEmail(email),
-          patientPhone: phone.trim() || undefined,
-          serviceType,
-          centerId,
-          staffProfileId: staffProfileId || undefined,
-          startTime: startISO,
-          endTime: endAsDate.toISOString(),
-          durationMinutes: duration,
-          isVirtual: modality === 'VIRTUAL',
-        },
-      );
+    const patientData: ConfirmationPatient = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      // Normalizado: el backend identifica al paciente por email exacto.
+      email: normalizeEmail(email),
+      phone: phone.trim() || undefined,
+    };
 
-      // `replace` saca la pantalla del formulario del stack: si el paciente
-      // vuelve atrás desde la confirmación no puede reenviar la reserva.
-      navigation.replace('Confirmation', {
-        appointment,
-        date,
-        time,
-        patientPhone: phone.trim() || undefined,
+    // Los datos del formulario viajan a las siguientes pantallas: la cita la
+    // crea el backend (webhook o `directCreate`), así que el nombre completo y
+    // el correo solo existen aquí; `patientName` del backend viene enmascarado.
+    const booking = {
+      ...route.params,
+      patientName: patientData.firstName,
+      patientLastName: patientData.lastName,
+      patientEmail: patientData.email,
+      patientPhone: patientData.phone,
+    };
+
+    try {
+      const preference = await createPaymentPreference({
+        patientFirstName: patientData.firstName,
+        patientLastName: patientData.lastName,
+        patientEmail: patientData.email,
+        ...(patientData.phone ? { patientPhone: patientData.phone } : {}),
+        serviceType,
+        centerId,
+        ...(staffProfileId ? { staffProfileId } : {}),
+        startTime: startISO,
+        endTime: endAsDate.toISOString(),
+        durationMinutes: duration,
+        isVirtual: modality === 'VIRTUAL',
+      });
+
+      if (!preference.directCreate) {
+        const checkoutUrl =
+          preference.init_point ?? preference.sandbox_init_point;
+
+        if (!checkoutUrl) {
+          throw new Error(t('booking.checkoutUnavailable'));
+        }
+
+        // Se abre el checkout en el navegador del sistema: la app no puede
+        // incrustar Mercado Pago sin una dependencia nativa, y el paciente
+        // vuelve solo cuando termina. El estado real lo confirma `Payment`.
+        await Linking.openURL(checkoutUrl);
+      }
+
+      // `replace` saca el formulario del stack: volver atrás después de pagar no
+      // debe permitir reenviar la reserva.
+      navigation.replace('Payment', {
+        paymentId: preference.id,
+        booking,
+        patient: patientData,
       });
     } catch (err: unknown) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t));
     } finally {
       setSubmitting(false);
     }
@@ -145,54 +176,53 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
         keyboardDismissMode="on-drag"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Reserva de sesión</Text>
-          <Text style={styles.subtitle}>
-            Completa tus datos y confirma. Ya casi terminas.
-          </Text>
+          <Text style={styles.title}>{t('booking.title')}</Text>
+          <Text style={styles.subtitle}>{t('booking.subtitle')}</Text>
         </View>
 
         <View style={styles.summary}>
-          <Text style={styles.summaryLabel}>Servicio</Text>
+          <Text style={styles.summaryLabel}>{t('confirmation.service')}</Text>
           <Text style={styles.summaryValue}>{serviceLabel}</Text>
-          <Text style={styles.summaryLabel}>Duración</Text>
-          <Text style={styles.summaryValue}>{duration} minutos</Text>
-          <Text style={styles.summaryLabel}>Modalidad</Text>
+          <Text style={styles.summaryLabel}>{t('confirmation.dateTime')}</Text>
           <Text style={styles.summaryValue}>
-            {modality === 'VIRTUAL' ? 'Virtual' : 'Presencial'}
+            {t('confirmation.dateTimeValue', {
+              date: formatLongDate(date),
+              time: formatHour(time),
+            })}
           </Text>
-          <Text style={styles.summaryLabel}>Fecha y hora</Text>
+          <Text style={styles.summaryLabel}>{t('confirmation.modality')}</Text>
           <Text style={styles.summaryValue}>
-            {formatLongDate(date)} a las {formatHour(time)}
+            {modality === 'VIRTUAL'
+              ? t('modality.virtual')
+              : t('modality.onsite')}
           </Text>
         </View>
 
         <View style={styles.fields}>
           <Input
-            label="Nombre"
+            label={t('booking.firstName')}
             value={firstName}
             onChangeText={(value) => {
               setFirstName(value);
               clearFieldError('firstName');
             }}
             error={fieldErrors.firstName}
-            placeholder="Tu nombre"
             autoComplete="given-name"
             textContentType="givenName"
           />
           <Input
-            label="Apellido"
+            label={t('booking.lastName')}
             value={lastName}
             onChangeText={(value) => {
               setLastName(value);
               clearFieldError('lastName');
             }}
             error={fieldErrors.lastName}
-            placeholder="Tu apellido"
             autoComplete="family-name"
             textContentType="familyName"
           />
           <Input
-            label="Correo"
+            label={t('booking.email')}
             value={email}
             onChangeText={(value) => {
               setEmail(value);
@@ -207,14 +237,13 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
             textContentType="emailAddress"
           />
           <Input
-            label="Teléfono"
+            label={t('booking.phone')}
             value={phone}
             onChangeText={(value) => {
               setPhone(value);
               clearFieldError('phone');
             }}
             error={fieldErrors.phone}
-            placeholder="Opcional"
             keyboardType="phone-pad"
             autoComplete="tel"
             textContentType="telephoneNumber"
@@ -232,8 +261,10 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           </Text>
         ) : null}
 
+        <Text style={styles.notice}>{t('booking.paymentNotice')}</Text>
+
         <Button
-          title="Confirmar reserva"
+          title={submitting ? t('booking.submitting') : t('booking.submit')}
           onPress={handleSubmit}
           loading={submitting}
           disabled={submitting}
@@ -269,6 +300,12 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   fields: { gap: spacing.sm },
+  notice: {
+    ...typography.bodySmall,
+    color: colors.textSecondary,
+    marginTop: spacing.md,
+    marginBottom: spacing.md,
+  },
   error: {
     color: colors.error,
     fontSize: 13,

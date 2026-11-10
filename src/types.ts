@@ -2,14 +2,6 @@
 // Tipos compartidos de la app Soul
 // ================================
 
-export type AppointmentStatus =
-  | 'SCHEDULED'
-  | 'CONFIRMED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'CANCELLED'
-  | 'NO_SHOW';
-
 export type AvailabilityModality = 'VIRTUAL' | 'PRESENCIAL';
 
 export interface Center {
@@ -68,32 +60,7 @@ export const SERVICE_TYPES: ServiceTypeOption[] = [
   { value: 'Terapia individual presencial', label: 'Terapia individual presencial', durationMinutes: 45, modality: 'PRESENCIAL' },
 ];
 
-/**
- * Respuesta de `POST /public/appointments`.
- *
- * El backend devuelve la cita creada con el paciente y el terapeuta incluidos.
- * Es importante leerla en lugar de reconstruir la reserva en el cliente: el
- * servicio reasigna el terapeuta al profesional libre con menos citas, así que
- * `staffProfile` puede no ser el que el paciente eligió en la pantalla anterior.
- */
-export interface PublicAppointment {
-  id: string;
-  title: string;
-  status: AppointmentStatus;
-  startTime: string;
-  endTime: string;
-  durationMinutes: number;
-  isVirtual: boolean;
-  patient?: {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  staffProfile?: {
-    id: string;
-    specialty?: string;
-    user?: { id: string; firstName: string; lastName: string };
-  };
-}
+// La cita ya no se lee de `POST /public/appointments`: la crea el backend al
+// aprobarse el pago y la app recibe solo el resumen que arma
+// `utils/confirmation.ts` a partir de `/payments/status/:id`.
 

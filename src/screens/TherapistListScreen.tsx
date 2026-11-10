@@ -6,6 +6,7 @@ import { getErrorMessage } from '../api/errors';
 import { StaffProfile } from '../types';
 import { TherapistCard } from '../components/therapists/TherapistCard';
 import { EmptyState } from '../components/common/EmptyState';
+import { useI18n } from '../i18n/I18nProvider';
 import { colors, spacing, typography } from '../styles/theme';
 import type { ScreenProps } from '../navigation/types';
 
@@ -14,6 +15,7 @@ export function TherapistListScreen({
   navigation,
 }: ScreenProps<'TherapistList'>) {
   const { centerId } = route.params;
+  const { t } = useI18n();
 
   const [therapists, setTherapists] = useState<StaffProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,11 +32,11 @@ export function TherapistListScreen({
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError(getErrorMessage(err));
+        setError(getErrorMessage(err, t));
         setTherapists([]);
         setLoading(false);
       });
-  }, [centerId]);
+  }, [centerId, t]);
 
   useEffect(() => {
     loadTherapists();
@@ -50,27 +52,25 @@ export function TherapistListScreen({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Terapeutas</Text>
-        <Text style={styles.subtitle}>
-          Elige un terapeuta para ver su disponibilidad.
-        </Text>
+        <Text style={styles.title}>{t('therapists.title')}</Text>
+        <Text style={styles.subtitle}>{t('therapists.subtitle')}</Text>
       </View>
 
       {error ? (
         <EmptyState
-          title="No se pudieron cargar los terapeutas"
+          title={t('therapists.errorTitle')}
           description={error}
-          actionLabel="Reintentar"
+          actionLabel={t('common.retry')}
           onAction={loadTherapists}
         />
       ) : loading ? (
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>Cargando terapeutas…</Text>
+          <Text style={styles.loadingText}>{t('therapists.loading')}</Text>
         </View>
       ) : therapists.length === 0 ? (
         <EmptyState
-          title="No hay terapeutas disponibles"
-          description="Este centro aún no tiene terapeutas activos."
+          title={t('therapists.emptyTitle')}
+          description={t('therapists.emptyDescription')}
         />
       ) : (
         <FlatList

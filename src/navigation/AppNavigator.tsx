@@ -4,14 +4,18 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { MainTabsNavigator } from './MainTabsNavigator';
 import type { RootStackParamList } from './types';
+import { useI18n } from '../i18n/I18nProvider';
 import { TherapistListScreen } from '../screens/TherapistListScreen';
 import { AvailabilityScreen } from '../screens/AvailabilityScreen';
 import { BookingScreen } from '../screens/BookingScreen';
+import { PaymentScreen } from '../screens/PaymentScreen';
 import { ConfirmationScreen } from '../screens/ConfirmationScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
+  const { t } = useI18n();
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -29,25 +33,35 @@ export function AppNavigator() {
         <Stack.Screen
           name="TherapistList"
           component={TherapistListScreen}
-          options={{ title: 'Terapeutas' }}
+          options={{ title: t('therapists.screenTitle') }}
         />
         <Stack.Screen
           name="Availability"
           component={AvailabilityScreen}
-          options={{ title: 'Horarios disponibles' }}
+          options={{ title: t('availability.screenTitle') }}
         />
         <Stack.Screen
           name="Booking"
           component={BookingScreen}
-          options={{ title: 'Reservar sesión' }}
+          options={{ title: t('booking.screenTitle') }}
+        />
+        <Stack.Screen
+          name="Payment"
+          component={PaymentScreen}
+          options={{
+            title: t('payment.screenTitle'),
+            // Mientras se espera la confirmación del pago no hay nada que hacer
+            // atrás: la reserva ya está creada y salir solo confunde.
+            headerBackVisible: false,
+            gestureEnabled: false,
+          }}
         />
         <Stack.Screen
           name="Confirmation"
           component={ConfirmationScreen}
           options={{
-            title: '¡Reserva confirmada!',
-            // La cita ya se envió al backend: si el paciente vuelve atrás llega
-            // al formulario y puede crear una reserva duplicada.
+            title: t('confirmation.screenTitle'),
+            // La cita ya está pagada: volver atrás no debe reabrir el formulario.
             headerBackVisible: false,
             gestureEnabled: false,
           }}

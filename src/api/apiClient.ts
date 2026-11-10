@@ -1,4 +1,5 @@
 import { API_BASE_URL, API_TIMEOUT_MS } from '../config';
+import { getRequestLocale } from '../i18n/locale';
 import { ApiError } from './errors';
 
 interface RequestOptions {
@@ -11,9 +12,14 @@ interface RequestOptions {
 /**
  * Cliente HTTP genérico para consumir la API de backend-soul.
  *
- * Nota: la app paciente usa la sección `/public` (sin autenticación).
+ * La app paciente usa la sección `/public` (sin autenticación).
  * Si más adelante se necesita un login de personal, aquí se puede agregar
  * el manejo de JWT (Storage + cabecera Authorization).
+ *
+ * `Accept-Language` se envía siempre: el backend traduce los mensajes de error
+ * con ese header (`src/common/i18n`), así que el texto que el paciente ve en un
+ * toast está en el mismo idioma que la pantalla, incluidos los conflictos de
+ * horario que arma el servidor.
  */
 
 async function fetchJson<T>(
@@ -24,6 +30,7 @@ async function fetchJson<T>(
 
   const requestHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
+    'Accept-Language': getRequestLocale(),
     ...headers,
   };
 

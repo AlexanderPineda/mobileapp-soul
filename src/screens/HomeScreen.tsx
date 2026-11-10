@@ -7,6 +7,8 @@ import { getErrorMessage } from '../api/errors';
 import { Center } from '../types';
 import { CenterCard } from '../components/centers/CenterCard';
 import { EmptyState } from '../components/common/EmptyState';
+import { LanguageToggle } from '../components/common/LanguageToggle';
+import { useI18n } from '../i18n/I18nProvider';
 import { colors, spacing, typography } from '../styles/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
@@ -14,6 +16,7 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   // La tab no tiene header propio: el inset superior se aplica aquí para que el
   // título no quede debajo de la barra de estado con edge-to-edge.
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   const [centers, setCenters] = useState<Center[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,11 +32,11 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         setLoading(false);
       })
       .catch((err: unknown) => {
-        setError(getErrorMessage(err));
+        setError(getErrorMessage(err, t));
         setCenters([]);
         setLoading(false);
       });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadCenters();
@@ -46,27 +49,28 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Encuentra tu centro</Text>
-        <Text style={styles.subtitle}>
-          Elige un centro para ver los terapeutas y horarios disponibles.
-        </Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>{t('home.title')}</Text>
+          <LanguageToggle />
+        </View>
+        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
       </View>
 
       {error ? (
         <EmptyState
-          title="No se pudieron cargar los centros"
+          title={t('home.errorTitle')}
           description={error}
-          actionLabel="Reintentar"
+          actionLabel={t('common.retry')}
           onAction={loadCenters}
         />
       ) : loading ? (
         <View style={styles.loading}>
-          <Text style={styles.loadingText}>Cargando centros…</Text>
+          <Text style={styles.loadingText}>{t('home.loading')}</Text>
         </View>
       ) : centers.length === 0 ? (
         <EmptyState
-          title="Aún no hay centros disponibles"
-          description="Comunícate con el administrador del sitio para conocer la ubicación de los centros."
+          title={t('home.emptyTitle')}
+          description={t('home.emptyDescription')}
         />
       ) : (
         <FlatList
@@ -83,7 +87,13 @@ export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: { padding: spacing.lg, gap: spacing.sm },
-  title: { ...typography.h1, color: colors.text },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  title: { ...typography.h1, color: colors.text, flex: 1 },
   subtitle: { ...typography.body, color: colors.textSecondary },
   list: { padding: spacing.lg },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
