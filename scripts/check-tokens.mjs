@@ -102,9 +102,25 @@ const mobile = parseMobileTheme(readFileSync(MOBILE_THEME, 'utf8'));
 const mismatches = [];
 const missing = [];
 
+/**
+ * Resuelve una indirección `var(--x)` contra el mapa de variables.
+ *
+ * El web declara algunos tokens de estado como `--color-success: var(--success)`
+ * para que el tema oscuro pueda sustituirlos. Sin esto, la comprobación
+ * compararía el literal `var(--success)` con el hex de la app.
+ */
+function resolveVar(value, vars, depth = 0) {
+  if (!value) return value;
+  const match = /^var\(\s*(--[a-z0-9-]+)\s*\)$/i.exec(value.trim());
+  if (!match || depth > 2) return value;
+
+  const target = vars.get(match[1].toLowerCase());
+  return target ? resolveVar(target, vars, depth + 1) : value;
+}
+
 for (const [token, cssVar] of Object.entries(CONTRACT)) {
   const mobileValue = mobile.get(token);
-  const webValue = webVars.get(cssVar);
+  const webValue = resolveVar(webVars.get(cssVar), webVars);
 
   if (!mobileValue) {
     missing.push(`  ${token} no existe en theme.ts`);
