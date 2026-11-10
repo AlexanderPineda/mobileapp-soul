@@ -37,6 +37,31 @@ Verificación rápida:
 curl -s http://localhost:777/api/public/centers | head
 ```
 
+### Entornos y URL del API
+
+La URL vive en `src/config.ts` y se elige con `__DEV__`:
+
+| Entorno | URL | Cuándo |
+| --- | --- | --- |
+| development | `http://localhost:777/api` (iOS) / `http://10.0.2.2:777/api` (Android) | builds de debug, Metro |
+| production | `https://api.soulrenacecontigo.com/api` | builds de release |
+
+No se leen variables de entorno: React Native **no inyecta** `process.env` en el
+bundle, así que un `.env` aquí no haría nada (era el bug: todo build terminaba
+apuntando a `localhost`). Si algún día hace falta un staging, se añade una
+entrada más a `API_URLS_BY_ENVIRONMENT` y un criterio de selección.
+
+Producción usa https con certificado válido (Let's Encrypt), así que no hacen
+falta excepciones de ATS en iOS ni permitir tráfico en claro en Android: el
+release deja `usesCleartextTraffic` en `false`, que es lo correcto.
+
+Verificación del backend publicado:
+
+```sh
+curl -s https://api.soulrenacecontigo.com/api/public/centers | head
+curl -s https://api.soulrenacecontigo.com/api/services/active | head
+```
+
 ---
 
 ## 2. Metro (dev server)
@@ -198,9 +223,11 @@ backend descarta los horarios que ya empezaron.
    el selector **ES/EN**.
 2. Centro → **Terapeutas** filtrados por el centro elegido.
 3. Terapeuta → **Horarios disponibles** con selector de servicio, día y slots;
-   cada slot muestra cuántos terapeutas lo tienen libre. Las franjas **mixtas**
-   del backend llegan aquí sin distinción: el paciente solo elige virtual o
-   presencial.
+   cada slot muestra cuántos terapeutas lo tienen libre. Los servicios salen de
+   `GET /services/active` (nombre y precio del catálogo, para que lo que se
+   ofrece sea exactamente lo que el backend puede cobrar) y el selector muestra
+   el precio. Las franjas **mixtas** del backend llegan aquí sin distinción: el
+   paciente solo elige virtual o presencial.
 4. Slot → **Reservar sesión** con el resumen (servicio, modalidad, fecha y hora
    en hora local).
 5. Formulario (nombre, apellido, correo, teléfono opcional) →
@@ -213,6 +240,16 @@ backend descarta los horarios que ya empezaron.
    confirma (`PAID`), falla (`FAILED`/`REFUNDED`/`VOIDED`) o el pago no existe.
 8. → **¡Reserva confirmada!** con la cita que creó el backend, monto cobrado,
    *Agregar a Google Calendar* y *Compartir la cita*.
+
+### Mercado Pago: qué hay configurado
+
+El backend lee `MERCADOPAGO_ACCESS_TOKEN`. Con un token `TEST-…` (el del `.env`
+local) `create-preference` devuelve `init_point` y `sandbox_init_point`: el cobro
+es de pruebas y se paga con tarjetas de prueba de Mercado Pago, no con dinero
+real. La app usa `init_point` y, si no viene, `sandbox_init_point` — el mismo
+orden que la web. Si en algún momento el checkout de pruebas no abre, cambiar el
+orden en `BookingScreen` es una línea; la decisión está anotada aquí para no
+descubrirlo en producción.
 
 ### Sin pasarela configurada (`directCreate`)
 
@@ -271,3 +308,69 @@ El `startTime` se guarda en UTC: un slot de **08:00** local (UTC-5) queda como
 | `Text strings must be rendered within a <Text> component` | texto suelto fuera de `<Text>` | envuelve el contenido en `<Text>` |
 | La app no carga datos | Metro caído o backend apagado | `npm start` y `npm run start:dev` en `backend-soul` |
 
+
+---
+
+## 9. Publicación (Google Play y App Store)
+
+### Identificador de la app
+
+| Plataforma | Dónde | Valor |
+| --- | --- | --- |
+| Android | `android/app/build.gradle` → `applicationId` | `com.linksolucionescolombia.soul` |
+| iOS | `PRODUCT_BUNDLE_IDENTIFIER` (Debug y Release) | `com.linksolucionescolombia.soul` |
+
+**No se puede cambiar después de publicar.** En Android, `namespace` sigue siendo
+`com.appsoul` a propósito: es el paquete del código Kotlin y el manifiesto resuelve
+`.MainApplication` contra él, no contra el `applicationId`.
+
+### Cuentas
+
+| Cuenta | Tipo | Costo | Requisito |
+| --- | --- | --- | --- |
+| Apple Developer | Organización | 99 USD/año | D-U-N-S de Link Soluciones Colombia |
+| Google Play Console | Organización | 25 USD único | D-U-N-S en el perfil de Google Payments |
+
+La cuenta de **organización** en Play evita la regla de 12 testers durante 14 días
+que aplica a las cuentas personales nuevas. El D-U-N-S es gratuito (D&B tarda hasta
+5 días hábiles; Apple, 2 más en recibirlo) y debe pedirse con la **razón social
+exacta** del RUT: Apple no acepta nombres comerciales ni sucursales.
+
+Google Play pide la **web de la organización** en la verificación, así que el
+dominio debe estar publicado (ver abajo).
+
+### Firma de Android
+
+`signingConfigs.release` lee cuatro valores de `~/.gradle/gradle.properties`
+(nunca del repo):
+
+```properties
+SOUL_UPLOAD_STORE_FILE=/ruta/segura/soul-upload.keystore
+SOUL_UPLOAD_STORE_PASSWORD=***
+SOUL_UPLOAD_KEY_ALIAS=soul
+SOUL_UPLOAD_KEY_PASSWORD=***
+```
+
+Generar una vez y guardar el `.keystore` fuera del repositorio y con copia de
+seguridad: **si se pierde, la app no se puede volver a actualizar** en Play.
+
+### Checklist antes de subir
+
+1. `npm run validate` en verde y un build de **release** instalado en un
+teléfono (no solo el emulador en debug).
+2. Confirmar que el release apunta a `https://api.soulrenacecontigo.com/api`
+   (el bundle no debe contener `localhost`).
+3. Reservar y **pagar con tarjeta de prueba** de Mercado Pago, y comprobar en el
+   panel que la cita quedó con pago `PAID`.
+4. Subir `versionCode`/`versionName` (Android) y `CFBundleShortVersionString`
+   (iOS) en cada entrega.
+5. Política de privacidad publicada y formularios de datos de Apple/Play con la
+   clínica como responsable del dato (Ley 1581 de 2012).
+
+### Cobro de sesiones y las tiendas
+
+Apple exige su sistema de pagos (IAP) para contenido digital, pero **no** para
+servicios del mundo real o persona a persona. Una sesión de terapia con un
+profesional entra en esa excepción, así que Mercado Pago es válido. Conviene
+dejar la justificación escrita en las notas de revisión de la primera entrega,
+porque es un punto que puede generar preguntas.

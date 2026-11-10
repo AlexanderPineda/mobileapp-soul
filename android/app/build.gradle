@@ -79,7 +79,12 @@ android {
 
     namespace "com.appsoul"
     defaultConfig {
-        applicationId "com.appsoul"
+        // Identificador con el que se publica en Play. Debe coincidir con el bundle
+        // id de iOS (com.linksolucionescolombia.soul) y **no se puede cambiar
+        // después de publicar**. `namespace` se deja en `com.appsoul` porque es el
+        // paquete del código Kotlin: el manifiesto resuelve `.MainApplication`
+        // contra él, no contra el applicationId.
+        applicationId "com.linksolucionescolombia.soul"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
