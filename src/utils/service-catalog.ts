@@ -5,13 +5,13 @@ import type {
 } from '../types';
 
 /**
- * Duración y modalidad por nombre de servicio.
+ * Duration and modality per service name.
  *
- * `Service` **todavía no guarda** `durationMinutes` ni la modalidad (es el ítem 6
- * del backlog del backend), así que estos dos datos siguen viviendo en el
- * cliente. La diferencia con antes es de dónde salen el nombre y el precio: del
- * catálogo (`GET /services/active`), que es lo único que el backend valida al
- * cobrar. Esta tabla solo aporta lo que el backend no modela.
+ * `Service` **does not store** `durationMinutes` or the modality yet (it is item 6
+ * of the backend backlog), so these two values still live in the client. The
+ * difference from before is where the name and price come from: the catalogue
+ * (`GET /services/active`), which is the only thing the backend validates when
+ * charging. This table only adds what the backend does not model.
  */
 const SERVICE_RULES: Record<
   string,
@@ -29,16 +29,17 @@ const SERVICE_RULES: Record<
   },
 };
 
-/** Duración por defecto cuando el servicio no está en la tabla (misma que la web). */
+/** Default duration when the service is not in the table (same as the web). */
 const FALLBACK_DURATION_MINUTES = 45;
 
 /**
- * Convierte el catálogo en opciones del selector.
+ * Turns the catalogue into options for the picker.
  *
- * Un servicio creado desde el panel aparece en la app sin tocar código. Si no
- * está en `SERVICE_RULES` se usa la misma heurística que `/agendar`: 45 minutos y
- * "virtual" en el nombre ⇒ virtual; si no, presencial. Es una heurística, y por
- * eso el precio nunca se deduce: viene del catálogo.
+ * A service created from the dashboard shows up in the app without touching
+ * code. When it is not in `SERVICE_RULES` the same heuristic as `/agendar` is
+ * used: 45 minutes and "virtual" in the name ⇒ virtual; otherwise on-site. It is
+ * a heuristic, which is why the price is never inferred: it comes from the
+ * catalogue.
  */
 export function toServiceOptions(
   services: CatalogService[],
@@ -50,8 +51,8 @@ export function toServiceOptions(
       (service.name.toLowerCase().includes('virtual') ? 'VIRTUAL' : 'PRESENCIAL');
 
     return {
-      // El nombre es la llave: `create-preference` lo busca en el catálogo y
-      // responde 400 si no existe o está inactivo.
+      // The name is the key: `create-preference` looks it up in the catalogue and
+      // answers 400 when it does not exist or is inactive.
       value: service.name,
       label: service.name,
       durationMinutes: rule?.durationMinutes ?? FALLBACK_DURATION_MINUTES,

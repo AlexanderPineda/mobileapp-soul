@@ -1,30 +1,31 @@
 import { NativeModules } from 'react-native';
 
 /**
- * Idiomas que entiende la app.
+ * Languages the app understands.
  *
- * Son los mismos que acepta el backend en `Accept-Language` (`src/common/i18n/
- * locales.ts` de backend-soul). Sumar un idioma exige tocar los dos diccionarios
- * de `messages.ts` y esta lista; el test de paridad falla si falta una clave.
+ * The same ones the backend accepts in `Accept-Language`
+ * (`src/common/i18n/locales.ts` in backend-soul). Adding a language means
+ * touching both dictionaries in `messages.ts` and this list; the parity test
+ * fails when a key is missing.
  */
 export const SUPPORTED_LOCALES = ['es', 'en'] as const;
 
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 
-/** Locale por defecto: el producto nació en español. */
+/** Default locale: the product was born in Spanish. */
 export const DEFAULT_LOCALE: Locale = 'es';
 
 /**
- * Locale BCP 47 que se le pasa a `Intl` para fechas y montos.
+ * BCP 47 locale passed to `Intl` for dates and amounts.
  *
- * `es-CO` y no `es-ES` porque el formato de fecha y el separador de miles que
- * ven los pacientes colombianos son los de `es-CO` (y coincide con el web).
+ * `es-CO` and not `es-ES` because the date format and thousands separator
+ * Colombian patients see are the `es-CO` ones (and it matches the web).
  */
 export function intlLocale(locale: Locale): string {
   return locale === 'en' ? 'en-US' : 'es-CO';
 }
 
-/** ¿El valor que reporta el sistema es inglés? Se compara solo el prefijo. */
+/** Is the value reported by the system English? Only the prefix is compared. */
 export function normalizeLocale(value: string | undefined): Locale | null {
   if (!value) return null;
   const tag = value.toLowerCase();
@@ -35,18 +36,18 @@ export function normalizeLocale(value: string | undefined): Locale | null {
     }
   }
 
-  // Cualquier otro idioma cae en el fallback explícito en vez de quedar sin
-  // texto: el paciente ve la app en español, no en una mezcla.
+  // Any other language falls into the explicit fallback instead of being left
+  // without text: the patient sees the app in Spanish, not in a mixture.
   return null;
 }
 
 /**
- * Idioma del teléfono, sin dependencias nativas nuevas.
+ * Phone language, without new native dependencies.
  *
- * Se intenta primero `Intl` (Hermes lo incluye en RN 0.87 en iOS y Android).
- * Si el runtime no lo expone se lee el ajuste nativo: `AppleLocale` en iOS e
- * `I18nManager.localeIdentifier` en Android. Todo va dentro de `try` porque son
- * módulos nativos y en Jest no existen.
+ * `Intl` is tried first (Hermes ships it in RN 0.87 on iOS and Android). If the
+ * runtime does not expose it, the native setting is read: `AppleLocale` on iOS
+ * and `I18nManager.localeIdentifier` on Android. Everything sits inside a `try`
+ * because they are native modules and do not exist in Jest.
  */
 export function detectDeviceLocale(): Locale {
   const candidates: (string | undefined)[] = [];
@@ -54,7 +55,7 @@ export function detectDeviceLocale(): Locale {
   try {
     candidates.push(Intl.DateTimeFormat().resolvedOptions().locale);
   } catch {
-    // Runtime sin Intl: se sigue con el ajuste nativo.
+    // Runtime without Intl: it continues with the native setting.
   }
 
   try {
@@ -71,7 +72,7 @@ export function detectDeviceLocale(): Locale {
       | undefined;
     candidates.push(i18nManager?.localeIdentifier);
   } catch {
-    // Sin acceso a los módulos nativos: queda el fallback.
+    // No access to the native modules: the fallback remains.
   }
 
   for (const candidate of candidates) {
@@ -83,12 +84,12 @@ export function detectDeviceLocale(): Locale {
 }
 
 /**
- * Idioma que usa el cliente HTTP para `Accept-Language`.
+ * Language the HTTP client uses for `Accept-Language`.
  *
- * Vive fuera de React a propósito: `apiClient` lo lee en cada petición y no
- * puede depender de un hook. El provider lo mantiene sincronizado con el idioma
- * elegido, incluido el del arranque (por eso se inicializa con el del sistema:
- * la primera pantalla ya pide los datos en el idioma correcto).
+ * It lives outside React on purpose: `apiClient` reads it on every request and
+ * cannot depend on a hook. The provider keeps it in sync with the chosen
+ * language, including the startup one (that is why it is initialised with the
+ * system one: the first screen already requests data in the right language).
  */
 let requestLocale: Locale = detectDeviceLocale();
 

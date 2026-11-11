@@ -13,8 +13,8 @@ module.exports = {
       files: ['**/*.ts', '**/*.tsx'],
       parser: '@typescript-eslint/parser',
       rules: {
-        // Las props y los parámetros con prefijo `_` son intencionalmente
-        // ignorados; el resto de variables sin usar deben avisar.
+        // Props and parameters prefixed with `_` are intentionally
+        // ignored; the rest of the unused variables must warn.
         '@typescript-eslint/no-unused-vars': [
           'warn',
           { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
- * Comprueba que los tokens de la app móvil coincidan con el design system web
- * (frontend-soul). No escribe nada: solo lee el CSS del web y el theme local.
+ * Checks that the mobile app tokens match the web design system
+ * (frontend-soul). It writes nothing: it only reads the web CSS and the local
+ * theme.
  *
- * Uso:
+ * Usage:
  *   npm run tokens:check
- *   SOUL_WEB_CSS=/ruta/a/globals.css npm run tokens:check
+ *   SOUL_WEB_CSS=/path/to/globals.css npm run tokens:check
  *
- * Sale con código 1 si hay diferencias, para poder usarlo en un hook o en CI.
- * Si el repo web no está clonado al lado, avisa y termina con 0 (no rompe).
+ * It exits with code 1 on differences, so it can be used in a hook or in CI.
+ * If the web repo is not cloned next to it, it warns and exits 0 (no breakage).
  */
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -22,7 +23,7 @@ const WEB_CSS =
   resolve(repoRoot, '../frontend-soul/src/app/globals.css');
 const MOBILE_THEME = resolve(repoRoot, 'src/styles/theme.ts');
 
-/** token móvil -> variable CSS del web */
+/** mobile token -> web CSS variable */
 const CONTRACT = {
   // superficies
   background: '--background',
@@ -30,7 +31,7 @@ const CONTRACT = {
   surfaceRaised: '--surface-2',
   surfaceInset: '--surface-inset',
   header: '--header',
-  // texto
+  // text
   text: '--foreground',
   textSecondary: '--muted-foreground',
   muted: '--muted',
@@ -48,7 +49,7 @@ const CONTRACT = {
   borderStrong: '--border-strong',
   input: '--input',
   ring: '--ring',
-  // estado
+  // state
   error: '--destructive',
   destructive: '--destructive',
   success: '--color-success',
@@ -68,7 +69,7 @@ function parseCssVars(css) {
   const vars = new Map();
   const re = /--([a-z0-9-]+)\s*:\s*([^;]+);/gi;
   let match;
-  // Se guarda la PRIMERA aparición: `:root` (tema claro) va antes que `.dark`.
+  // The FIRST occurrence is kept: `:root` (light theme) comes before `.dark`.
   while ((match = re.exec(css)) !== null) {
     const key = `--${match[1].toLowerCase()}`;
     if (!vars.has(key)) vars.set(key, match[2].trim());

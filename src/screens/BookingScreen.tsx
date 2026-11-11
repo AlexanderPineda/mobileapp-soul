@@ -20,17 +20,17 @@ import { isValidEmail, isValidPhone, normalizeEmail } from '../utils/validation'
 import type { ConfirmationPatient } from '../navigation/types';
 import type { ScreenProps } from '../navigation/types';
 
-/** Errores por campo del formulario. */
+/** Errors per form field. */
 type FieldErrors = Partial<
   Record<'firstName' | 'lastName' | 'email' | 'phone', string>
 >;
 
 /**
- * Libera la reserva temporal de un pago que no llegó a pagarse.
+ * Releases the temporary hold of a payment that was never completed.
  *
- * Se usa cuando el checkout no se puede abrir: el backend ya tomó el horario
- * (15 minutos) y, sin esto, el paciente vería su propio horario como ocupado al
- * reintentar. Es best-effort: si la llamada falla, la reserva caduca sola.
+ * Used when the checkout cannot be opened: the backend already took the slot
+ * (15 minutes) and, without this, the patient would see their own time as busy
+ * when retrying. Best-effort: if the call fails, the hold expires on its own.
  */
 async function releaseHold(paymentId: string): Promise<void> {
   await markPaymentFailed(paymentId).catch(() => undefined);
@@ -61,17 +61,17 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
   const [email, setEmail] = useState(patientEmail);
   const [phone, setPhone] = useState(patientPhone ?? '');
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
-  /** Error de la llamada al backend, no de un campo concreto. */
+  /** Backend call error, not a specific field one. */
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // `startTime` es el instante exacto que calculó el backend con la zona horaria
-  // IANA del centro (`Center.timezone`), así que aquí no hay que reconstruirlo.
+  // `startTime` is the exact instant the backend computed with the centre IANA
+  // time zone (`Center.timezone`), so it does not have to be rebuilt here.
   const startISO = startTime;
   const startAsDate = new Date(startISO);
   const endAsDate = new Date(startAsDate.getTime() + duration * 60_000);
 
-  /** Al escribir en un campo se limpia su error para no dejar mensajes rancios. */
+  /** Typing in a field clears its error so no stale message is left. */
   const clearFieldError = (field: keyof FieldErrors) => {
     setFieldErrors((prev) =>
       prev[field] ? { ...prev, [field]: undefined } : prev,
@@ -115,14 +115,14 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
     const patientData: ConfirmationPatient = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
-      // Normalizado: el backend identifica al paciente por email exacto.
+      // Normalised: the backend identifies the patient by exact email.
       email: normalizeEmail(email),
       phone: phone.trim() || undefined,
     };
 
-    // Los datos del formulario viajan a las siguientes pantallas: la cita la
-    // crea el backend (webhook o `directCreate`), así que el nombre completo y
-    // el correo solo existen aquí; `patientName` del backend viene enmascarado.
+    // The form data travels to the next screens: the appointment is created
+    // by the backend (webhook or `directCreate`), so the full name and the
+    // email only exist here; the backend `patientName` arrives masked.
     const booking = {
       ...route.params,
       patientName: patientData.firstName,
@@ -151,17 +151,17 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           preference.init_point ?? preference.sandbox_init_point;
 
         if (!checkoutUrl) {
-          // La reserva ya está creada en el backend: si no hay checkout que
-          // abrir hay que liberarla o el horario queda bloqueado 15 minutos y
-          // el paciente no puede volver a intentarlo.
+          // The hold already exists in the backend: with no checkout to open it has
+          // to be released, or the slot stays blocked for 15 minutes and the
+          // patient cannot try again.
           await releaseHold(preference.id);
           throw new Error(t('booking.checkoutUnavailable'));
         }
 
         try {
-          // Se abre el checkout en el navegador del sistema: la app no puede
-          // incrustar Mercado Pago sin una dependencia nativa, y el paciente
-          // vuelve solo cuando termina. El estado real lo confirma `Payment`.
+          // The checkout opens in the system browser: the app cannot embed
+          // Mercado Pago without a native dependency, and the patient comes
+          // back on their own when done. `Payment` confirms the real state.
           await Linking.openURL(checkoutUrl);
         } catch {
           await releaseHold(preference.id);
@@ -169,8 +169,8 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
         }
       }
 
-      // `replace` saca el formulario del stack: volver atrás después de pagar no
-      // debe permitir reenviar la reserva.
+      // `replace` takes the form out of the stack: going back after paying must
+      // not allow resubmitting the booking.
       navigation.replace('Payment', {
         paymentId: preference.id,
         booking,
@@ -189,8 +189,8 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/*
-        Con el teclado abierto el formulario (resumen + 4 campos + botón) no cabe
-        en pantallas pequeñas, así que debe poder desplazarse.
+        With the keyboard open the form (summary + 4 fields + button) does not
+        fit on small screens, so it has to be scrollable.
       */}
       <ScrollView
         contentContainerStyle={styles.content}
@@ -284,7 +284,7 @@ export function BookingScreen({ route, navigation }: ScreenProps<'Booking'>) {
           <Text
             style={styles.error}
             accessibilityRole="alert"
-            // Anuncia el fallo sin que el usuario tenga que recorrer la pantalla.
+            // Announces the failure without making the user scan the screen.
             accessibilityLiveRegion="polite"
           >
             {error}
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
-  /** El monto que se cobra: mismo tamaño que el título para que se lea primero. */
+  /** The amount charged: same size as the title so it is read first. */
   totalValue: {
     ...typography.h3,
     color: colors.primary,

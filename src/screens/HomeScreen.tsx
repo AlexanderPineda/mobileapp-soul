@@ -13,8 +13,8 @@ import { colors, spacing, typography } from '../styles/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
 export function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
-  // La tab no tiene header propio: el inset superior se aplica aquí para que el
-  // título no quede debajo de la barra de estado con edge-to-edge.
+  // The tab has no header of its own: the top inset is applied here so the
+  // title does not end up under the status bar with edge-to-edge.
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
   const [centers, setCenters] = useState<Center[]>([]);

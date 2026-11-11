@@ -1,19 +1,19 @@
 import type { Locale } from './locale';
 
 /**
- * Diccionarios de la app.
+ * App dictionaries.
  *
- * `es` es la fuente de verdad: define las claves y `en` se tipa contra él
- * (`Record<keyof typeof es, string>`), así que una clave sin traducir no
- * compila. `__tests__/i18n.test.ts` cierra lo que el tipo no ve: ninguna cadena
- * vacía y las dos listas con exactamente las mismas claves.
+ * `es` is the source of truth: it defines the keys and `en` is typed against it
+ * (`Record<keyof typeof es, string>`), so an untranslated key does not compile.
+ * `__tests__/i18n.test.ts` covers what the type cannot see: no empty strings and
+ * both lists with exactly the same keys.
  *
- * Las claves son planas y con puntos (`booking.submit`) a propósito: se leen de
- * un vistazo, `keyof` da la unión exacta sin tipos recursivos y el test de
- * paridad compara listas planas.
+ * Keys are flat and dotted (`booking.submit`) on purpose: they read at a glance,
+ * `keyof` gives the exact union without recursive types and the parity test
+ * compares flat lists.
  *
- * Los textos son los mismos que ve el paciente en `/agendar` (frontend-soul), no
- * una segunda redacción: la app y la web no deben sonar distintas.
+ * The texts are the same ones the patient sees on `/agendar` (frontend-soul), not
+ * a second wording: the app and the web must not sound different.
  */
 const es = {
   // ============================== Comunes ==============================
@@ -25,7 +25,7 @@ const es = {
   'language.es': 'Español',
   'language.en': 'English',
 
-  // ============================== Inicio ==============================
+  // ============================== Home ==============================
   'home.tab': 'Inicio',
   'home.title': 'Encuentra tu centro',
   'home.subtitle': 'Elige un centro para ver los terapeutas y horarios disponibles.',
@@ -35,7 +35,7 @@ const es = {
     'Comunícate con el administrador del sitio para conocer la ubicación de los centros.',
   'home.loading': 'Cargando centros…',
 
-  // ============================== Terapeutas ==============================
+  // ============================== Therapists ==============================
   'therapists.screenTitle': 'Terapeutas',
   'therapists.title': 'Terapeutas',
   'therapists.subtitle': 'Elige un terapeuta para ver su disponibilidad.',
@@ -84,7 +84,7 @@ const es = {
   'errorBoundary.description':
     'Tuvimos un problema al mostrar esta pantalla. Puedes intentarlo de nuevo.',
 
-  // ============================== Reserva ==============================
+  // ============================== Booking ==============================
   'booking.screenTitle': 'Reservar sesión',
   'booking.title': 'Confirma tu reserva',
   'booking.subtitle': 'Revisa los datos y continúa al pago.',
@@ -105,7 +105,7 @@ const es = {
   'booking.checkoutUnavailable': 'No pudimos abrir la pasarela de pago. Inténtalo de nuevo.',
   'booking.total': 'Total a pagar',
 
-  // ============================== Pago ==============================
+  // ============================== Payment ==============================
   'payment.screenTitle': 'Pago',
   'payment.pendingTitle': 'Estamos confirmando tu pago',
   'payment.pendingDescription':
@@ -121,7 +121,7 @@ const es = {
   'payment.notFoundDescription':
     'Puede que el enlace haya caducado. Vuelve a reservar tu horario.',
 
-  // ============================== Confirmación ==============================
+  // ============================== Confirmation ==============================
   'confirmation.screenTitle': '¡Reserva confirmada!',
   'confirmation.title': '¡Reserva confirmada!',
   'confirmation.subtitle':
@@ -302,11 +302,11 @@ export type Dictionary = Record<MessageKey, string>;
 export const messagesByLocale: Record<Locale, Dictionary> = { es, en };
 
 /**
- * Texto de una clave, con `{placeholders}` interpolados.
+ * Text of a key, with `{placeholders}` interpolated.
  *
- * Si la clave falta en el idioma pedido se cae al español y, si tampoco está,
- * se devuelve la clave: un texto raro es preferible a una pantalla en blanco, y
- * el test de paridad evita que llegue a producción.
+ * When the key is missing in the requested language it falls back to Spanish
+ * and, if it is not there either, the key is returned: odd text beats a blank
+ * screen, and the parity test keeps that from reaching production.
  */
 export function translate(
   locale: Locale,
@@ -318,7 +318,7 @@ export function translate(
 
   if (params) {
     for (const [name, value] of Object.entries(params)) {
-      // `split/join` en lugar de `replaceAll`: no depende del runtime de Hermes.
+      // `split/join` instead of `replaceAll`: it does not depend on the Hermes runtime.
       text = text.split(`{${name}}`).join(String(value));
     }
   }

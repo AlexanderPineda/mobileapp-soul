@@ -11,13 +11,13 @@ import { I18nProvider } from '../src/i18n/I18nProvider';
 import { setRequestLocale } from '../src/i18n/locale';
 
 /**
- * Cobertura de los primitivos de UI: son la base de la accesibilidad de la app,
- * así que se verifica que expongan rol, etiqueta y estado al lector de pantalla.
+ * Coverage of the UI primitives: they are the basis of the app accessibility, so
+ * the tests check that they expose role, label and state to the screen reader.
  *
- * Las tarjetas leen textos del diccionario, así que se montan dentro de
- * `I18nProvider`. El idioma se fija en español antes de cada test: en Node el
- * idioma detectado es el del sistema (`en-US`), y estas aserciones comprueban
- * los textos del producto original, no la traducción.
+ * The cards read texts from the dictionary, so they are mounted inside
+ * `I18nProvider`. The language is pinned to Spanish before each test: in Node the
+ * detected language is the system one (`en-US`), and these assertions check the
+ * original product texts, not the translation.
  */
 
 beforeEach(() => {
@@ -54,7 +54,7 @@ describe('Button', () => {
       disabled: true,
       busy: true,
     });
-    // El título sigue disponible aunque se muestre el spinner.
+    // The title stays available even while the spinner is shown.
     expect(button.props.accessibilityLabel).toBe('Confirmar reserva');
   });
 
@@ -62,8 +62,8 @@ describe('Button', () => {
     const tree = await render(<Button title="Listo" onPress={() => {}} disabled />);
     const button = tree.root.findByProps({ accessibilityRole: 'button' });
 
-    // El bloqueo del toque lo aplica `TouchableOpacity` a partir de esta
-    // bandera; aquí se verifica que exponga el estado correcto.
+    // The tap block is applied by `TouchableOpacity` from this
+    // flag; here it is checked that it exposes the right state.
     expect(button.props.accessibilityState).toEqual({
       disabled: true,
       busy: false,

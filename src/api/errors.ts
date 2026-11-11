@@ -2,10 +2,10 @@ import type { Locale } from '../i18n/locale';
 import { translate, type MessageKey } from '../i18n/messages';
 
 /**
- * Error de la API de Soul.
+ * Soul API error.
  *
- * Se lanza desde `fetchJson` cuando el backend responde con un status >= 400,
- * conservando el `message` que envía NestJS (string o array del ValidationPipe).
+ * Thrown by `fetchJson` when the backend answers with a status >= 400, keeping
+ * the `message` NestJS sends (a string or a ValidationPipe array).
  */
 export class ApiError extends Error {
   status: number;
@@ -17,29 +17,29 @@ export class ApiError extends Error {
   }
 }
 
-/** Traductor que recibe la UI para hablar el idioma activo. */
+/** Translator the UI receives to speak the active language. */
 export type ErrorTranslator = (key: MessageKey) => string;
 
 /**
- * Traductor por defecto: español.
+ * Default translator: Spanish.
  *
- * `getErrorMessage` se usa también fuera de React (y en los tests), así que no
- * puede depender de un hook. Las pantallas pasan el `t` de `useI18n`.
+ * `getErrorMessage` is also used outside React (and in the tests), so it cannot
+ * depend on a hook. The screens pass the `t` from `useI18n`.
  */
 const defaultTranslator: ErrorTranslator = (key) => translate('es', key);
 
 /**
- * Traduce cualquier error a un texto mostrable al paciente.
+ * Translates any error into text that can be shown to the patient.
  *
- * React Native no distingue bien los fallos de red: `fetch` rechaza con
- * "Network request failed" (Android) o "Failed to fetch" (iOS/web), y un
- * timeout del `AbortController` llega como `AbortError`. Sin esta traducción el
- * paciente ve mensajes en inglés o el literal `undefined` cuando el valor
- * lanzado no es un `Error`.
+ * React Native does not tell network failures apart well: `fetch` rejects with
+ * "Network request failed" (Android) or "Failed to fetch" (iOS/web), and an
+ * `AbortController` timeout arrives as `AbortError`. Without this translation the
+ * patient sees English messages, or the literal `undefined` when the thrown
+ * value is not an `Error`.
  *
- * Los estados que el backend no explica con texto propio se traducen aquí:
- * `429` (los endpoints de pago están limitados por IP) y `401`, que hoy no
- * aparecen en la app pero llegarán cuando exista identidad del paciente.
+ * The statuses the backend does not explain with its own copy are translated
+ * here: `429` (payment endpoints are rate-limited per IP) and `401`, which do not
+ * show up in the app today but will once patient identity exists.
  */
 export function getErrorMessage(
   error: unknown,
@@ -68,8 +68,8 @@ export function getErrorMessage(
 }
 
 /**
- * Variante con locale explícito, para código que no es React.
- * Se apoya en el mismo diccionario, así que no hay textos duplicados.
+ * Variant with an explicit locale, for non-React code.
+ * It relies on the same dictionary, so there are no duplicated texts.
  */
 export function getErrorMessageFor(
   error: unknown,

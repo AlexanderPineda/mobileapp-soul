@@ -1,19 +1,19 @@
 /**
- * Validación y normalización de los datos del paciente.
+ * Validation and normalisation of the patient data.
  *
- * Centralizado aquí para poder probarlo y para que el correo se envíe siempre
- * en el mismo formato: el backend busca al paciente por email exacto, así que
- * `Juan@X.com` y `juan@x.com` deben llegar como un único valor.
+ * Centralised here so it can be tested and so the email always goes out in the
+ * same format: the backend looks the patient up by exact email, so `Juan@X.com`
+ * and `juan@x.com` must arrive as a single value.
  */
 
-/** Sin espacios, una sola arroba y un TLD alfabético de 2 o más letras. */
+/** No spaces, a single at sign and an alphabetic TLD of 2 or more letters. */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
 
-/** Entre 7 y 15 dígitos, el rango de E.164. */
+/** Between 7 and 15 digits, the E.164 range. */
 const MIN_PHONE_DIGITS = 7;
 const MAX_PHONE_DIGITS = 15;
 
-/** Normaliza un correo para enviarlo y compararlo: sin espacios y en minúsculas. */
+/** Normalises an email to send and compare it: no spaces, lowercase. */
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
@@ -23,8 +23,8 @@ export function isValidEmail(value: string): boolean {
 }
 
 /**
- * Valida un teléfono ya normalizado a dígitos.
- * Acepta separadores habituales (`+57 300 123-4567`, `(601) 555 0000`).
+ * Validates a phone already normalised to digits.
+ * It accepts the usual separators (`+57 300 123-4567`, `(601) 555 0000`).
  */
 export function isValidPhone(value: string): boolean {
   const digits = value.replace(/\D/g, '');

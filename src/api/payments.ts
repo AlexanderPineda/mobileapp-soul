@@ -1,15 +1,16 @@
 import { api } from './apiClient';
 
 /**
- * Client del flujo de pago del paciente.
+ * Client for the patient payment flow.
  *
- * La cita **solo existe si el pago se aprueba**: `create-preference` reserva el
- * horario (`SlotHold`, 15 min) y devuelve el checkout de Mercado Pago; la cita
- * la crea el webhook o, si no hay pasarela configurada, el propio backend
- * (`directCreate`). Por eso la app nunca llama a `POST /public/appointments`:
- * crearía una cita sin cobro, que es justo lo que la web no permite.
+ * The appointment **only exists when the payment is approved**:
+ * `create-preference` holds the slot (`SlotHold`, 15 min) and returns the Mercado
+ * Pago checkout; the appointment is created by the webhook or, when no gateway is
+ * configured, by the backend itself (`directCreate`). That is why the app never
+ * calls `POST /public/appointments`: it would create an appointment with no
+ * charge, which is exactly what the web does not allow.
  *
- * Endpoints públicos, sin JWT (ver `payments.controller.ts`).
+ * Public endpoints, no JWT (see `payments.controller.ts`).
  */
 
 export interface CreatePaymentPreferencePayload {
@@ -20,7 +21,7 @@ export interface CreatePaymentPreferencePayload {
   serviceType: string;
   centerId: string;
   staffProfileId?: string;
-  /** Instante exacto del slot (ISO 8601 UTC) que devolvió el backend. */
+  /** Exact slot instant (ISO 8601 UTC) returned by the backend. */
   startTime: string;
   endTime: string;
   durationMinutes: number;
@@ -29,14 +30,15 @@ export interface CreatePaymentPreferencePayload {
 
 export interface PaymentPreferenceResponse {
   id: string;
-  /** Checkout de producción (`null` cuando el pago se creó directo). */
+  /** Production checkout (`null` when the payment was created directly). */
   init_point: string | null;
-  /** Checkout de pruebas, solo como respaldo si no hay `init_point`. */
+  /** Test checkout, only as a fallback when there is no `init_point`. */
   sandbox_init_point?: string | null;
   preferenceId?: string;
   /**
-   * `true` cuando el backend no tiene pasarela configurada y ya creó la cita.
-   * En ese caso no hay checkout que abrir: se consulta el estado y se sigue.
+   * `true` when the backend has no gateway configured and already created the
+   * appointment. In that case there is no checkout to open: the status is polled
+   * and the flow continues.
    */
   directCreate?: boolean;
 }
@@ -48,7 +50,7 @@ export type PaymentStatusValue =
   | 'REFUNDED'
   | 'VOIDED';
 
-/** Cita mínima que expone el estado del pago para la pantalla de confirmación. */
+/** Minimum appointment the payment status exposes for the confirmation screen. */
 export interface PaymentAppointmentInfo {
   id: string;
   startTime: string;
@@ -65,11 +67,11 @@ export interface PaymentStatusResponse {
   status?: PaymentStatusValue;
   mpStatus?: string | null;
   serviceType?: string;
-  /** Nombre parcialmente enmascarado por el backend (`Ana G.`). */
+  /** Name partially masked by the backend (`Ana G.`). */
   patientName?: string;
   amount?: number;
   message?: string;
-  /** `null` mientras el pago no generó cita (revisión manual, pago pendiente). */
+  /** `null` while the payment has not generated an appointment (manual review, pending payment). */
   appointment?: PaymentAppointmentInfo | null;
 }
 
@@ -82,7 +84,7 @@ export function createPaymentPreference(
   );
 }
 
-/** Estado del pago. Es público a propósito: la app lo sondea sin sesión. */
+/** Payment status. Public on purpose: the app polls it without a session. */
 export function getPaymentStatus(
   paymentId: string,
 ): Promise<PaymentStatusResponse> {
@@ -92,11 +94,11 @@ export function getPaymentStatus(
 }
 
 /**
- * Marca el pago como fallido y libera el horario reservado.
+ * Marks the payment as failed and releases the held slot.
  *
- * Se usa cuando el paciente abandona el checkout: así el horario vuelve a estar
- * disponible de inmediato en lugar de esperar los 15 minutos de la reserva
- * temporal. Best-effort: si falla, la reserva caduca sola.
+ * Used when the patient abandons the checkout: that way the time becomes
+ * available again right away instead of waiting the 15 minutes of the temporary
+ * hold. Best-effort: if it fails, the hold expires on its own.
  */
 export function markPaymentFailed(
   paymentId: string,

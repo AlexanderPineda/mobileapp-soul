@@ -24,8 +24,8 @@ export function Input({
       <Text style={styles.label}>{label}</Text>
       <TextInput
         {...props}
-        // Sin esto el lector de pantalla anuncia el campo sin su nombre: la
-        // etiqueta es un `Text` hermano y no un `label` real de formulario.
+        // Without this the screen reader announces the field without its name: the
+        // label is a sibling `Text` and not a real form `label`.
         accessibilityLabel={props.accessibilityLabel ?? label}
         style={[
           styles.input,

@@ -10,16 +10,16 @@ interface RequestOptions {
 }
 
 /**
- * Cliente HTTP genérico para consumir la API de backend-soul.
+ * Generic HTTP client to consume the backend-soul API.
  *
- * La app paciente usa la sección `/public` (sin autenticación).
- * Si más adelante se necesita un login de personal, aquí se puede agregar
- * el manejo de JWT (Storage + cabecera Authorization).
+ * The patient app uses the `/public` section (no authentication).
+ * If staff login is needed later, JWT handling (Storage + Authorization header)
+ * can be added here.
  *
- * `Accept-Language` se envía siempre: el backend traduce los mensajes de error
- * con ese header (`src/common/i18n`), así que el texto que el paciente ve en un
- * toast está en el mismo idioma que la pantalla, incluidos los conflictos de
- * horario que arma el servidor.
+ * `Accept-Language` is always sent: the backend translates error messages with
+ * that header (`src/common/i18n`), so the text the patient sees in a toast is in
+ * the same language as the screen, including the schedule conflicts the server
+ * builds.
  */
 
 async function fetchJson<T>(
@@ -58,7 +58,7 @@ async function fetchJson<T>(
     });
 
     if (!response.ok) {
-      // NestJS devuelve `message` como string o como array (ValidationPipe).
+      // NestJS returns `message` as a string or as an array (ValidationPipe).
       const errorBody = (await response.json().catch(() => null)) as
         | { message?: string | string[] }
         | null;
@@ -73,7 +73,7 @@ async function fetchJson<T>(
       throw new ApiError(message, response.status);
     }
 
-    // 204 No Content (p. ej. DELETE) no tiene cuerpo que parsear.
+    // 204 No Content (e.g. DELETE) has no body to parse.
     if (response.status === 204) {
       return undefined as T;
     }

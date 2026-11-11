@@ -11,8 +11,8 @@ describe('normalizeEmail', () => {
   });
 
   it('converge los distintos formatos al mismo valor', () => {
-    // El backend identifica al paciente por email exacto: estas dos entradas
-    // deben producir el mismo registro.
+    // The backend identifies the patient by exact email: these two inputs
+    // must produce the same record.
     expect(normalizeEmail('Ana@Soul.com')).toBe(normalizeEmail(' ana@soul.COM'));
   });
 });

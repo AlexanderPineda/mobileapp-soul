@@ -1,12 +1,12 @@
 /**
- * Setup global de Jest.
+ * Global Jest setup.
  *
- * 1. `SafeAreaProvider` no renderiza a sus hijos hasta que el módulo nativo le
- *    entrega los insets, por lo que en Jest el árbol queda vacío (`children:
- *    null`). El paquete publica un mock oficial con insets fijos.
- * 2. Los tests no deben tocar la red: cualquier `fetch` que llegue sin un mock
- *    explícito devuelve 404, en lugar de intentar alcanzar `localhost:777` y
- *    hacer que la suite pase o falle según si el backend está levantado.
+ * 1. `SafeAreaProvider` does not render its children until the native module
+ *    hands it the insets, so under Jest the tree stays empty (`children: null`).
+ *    The package ships an official mock with fixed insets.
+ * 2. Tests must not touch the network: any `fetch` arriving without an explicit
+ *    mock returns 404, instead of trying to reach `localhost:777` and making the
+ *    suite pass or fail depending on whether the backend is up.
  */
 
 /* eslint-env jest */

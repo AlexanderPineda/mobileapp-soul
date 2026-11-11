@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * Genera los iconos de la app (Android + iOS) desde una única definición
- * vectorial, sin dependencias externas.
+ * Generates the app icons (Android + iOS) from a single vector definition, with
+ * no external dependencies.
  *
- * Uso:
+ * Usage:
  *   npm run icons:generate
  *
- * El marcador es una silueta de persona sobre el color `ink` de la marca, que se
- * lee bien tanto a 1024 px como a 48 px. El script es reproducible; si algún día
- * hay un diseño oficial basta con reemplazar los PNG generados.
+ * The mark is a person silhouette over the brand `ink` colour, which reads well
+ * both at 1024 px and at 48 px. The script is reproducible; if an official
+ * design shows up one day, replacing the generated PNGs is enough.
  */
 import { deflateSync } from 'node:zlib';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -26,23 +26,23 @@ const CREAM = [0xf6, 0xf0, 0xe8]; // colors.cream
 const WHITE = [0xff, 0xff, 0xff];
 
 // ================================
-// Geometría del marcador (espacio propio, 0..1)
+// Mark geometry (its own space, 0..1)
 // ================================
 const HEAD = { cx: 0.5, cy: 0.385, r: 0.135 };
 const BODY = { cx: 0.5, cy: 0.8, r: 0.265 };
-/** Centro vertical del glifo, para poder centrarlo en el lienzo. */
+/** Vertical centre of the glyph, so it can be centred on the canvas. */
 const GLYPH_CY = 0.525;
-/** Alto del glifo en su propio espacio (cabeza arriba → base de los hombros). */
+/** Glyph height in its own space (top of the head → shoulder base). */
 const GLYPH_HEIGHT = 0.55;
 
-/** Muestras por eje para el antialiasing (4x4 = 16 submuestras por píxel). */
+/** Samples per axis for anti-aliasing (4x4 = 16 sub-samples per pixel). */
 const SAMPLES = 4;
 
 const circle = (x, y, cx, cy, r) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r;
 
 /**
- * ¿El punto (px, py) del lienzo cae dentro del glifo?
- * `fill` es la fracción del alto del lienzo que ocupa el glifo.
+ * Does the canvas point (px, py) fall inside the glyph?
+ * `fill` is the fraction of the canvas height the glyph occupies.
  */
 function inGlyph(px, py, fill) {
   const scale = fill / GLYPH_HEIGHT;
@@ -50,16 +50,16 @@ function inGlyph(px, py, fill) {
   const gy = (py - 0.5) / scale + GLYPH_CY;
 
   if (circle(gx, gy, HEAD.cx, HEAD.cy, HEAD.r)) return true;
-  // Hombros: semicírculo con la base plana a la altura del centro.
+  // Shoulders: semicircle with the flat base at the centre height.
   return gy <= BODY.cy && circle(gx, gy, BODY.cx, BODY.cy, BODY.r);
 }
 
 /**
- * Renderiza el icono con antialiasing.
+ * Renders the icon with anti-aliasing.
  *
- * @param {number} size Lado en píxeles.
+ * @param {number} size Side in pixels.
  * @param {{mode?: 'square'|'round'|'foreground', fill?: number, glyph?: number[]}} options
- * @returns {Buffer} RGBA de `size * size * 4` bytes.
+ * @returns {Buffer} RGBA of `size * size * 4` bytes.
  */
 function render(size, { mode = 'square', fill = 0.58, glyph = CREAM } = {}) {
   const rgba = Buffer.alloc(size * size * 4);
@@ -78,7 +78,7 @@ function render(size, { mode = 'square', fill = 0.58, glyph = CREAM } = {}) {
           const px = (x + (sx + 0.5) * step) / size;
           const py = (y + (sy + 0.5) * step) / size;
 
-          // Máscara exterior: círculo para `round`, nada para el foreground.
+          // Outer mask: circle for `round`, nothing for the foreground.
           if (mode === 'round' && !circle(px, py, 0.5, 0.5, 0.5)) continue;
 
           const onGlyph = inGlyph(px, py, fill);
@@ -92,7 +92,7 @@ function render(size, { mode = 'square', fill = 0.58, glyph = CREAM } = {}) {
         }
       }
 
-      if (opaque === 0) continue; // queda transparente
+      if (opaque === 0) continue; // left transparent
 
       const offset = (y * size + x) * 4;
       rgba[offset] = Math.round(r / opaque);
@@ -106,7 +106,7 @@ function render(size, { mode = 'square', fill = 0.58, glyph = CREAM } = {}) {
 }
 
 // ================================
-// Codificador PNG mínimo (sin dependencias)
+// Minimal PNG encoder (no dependencies)
 // ================================
 const CRC_TABLE = (() => {
   const table = new Int32Array(256);
@@ -140,7 +140,7 @@ function chunk(type, data) {
 /**
  * @param {number} size
  * @param {Buffer} rgba
- * @param {boolean} withAlpha `false` genera RGB: iOS rechaza iconos con alfa.
+ * @param {boolean} withAlpha `false` emits RGB: iOS rejects icons with alpha.
  */
 function encodePng(size, rgba, withAlpha) {
   const channels = withAlpha ? 4 : 3;
@@ -161,7 +161,7 @@ function encodePng(size, rgba, withAlpha) {
   const header = Buffer.alloc(13);
   header.writeUInt32BE(size, 0);
   header.writeUInt32BE(size, 4);
-  header[8] = 8; // bits por canal
+  header[8] = 8; // bits per channel
   header[9] = withAlpha ? 6 : 2; // 6 = RGBA, 2 = RGB
 
   return Buffer.concat([
@@ -225,7 +225,7 @@ for (const [file, size] of IOS_ICONS) {
     `ios/AppSoul/Images.xcassets/AppIcon.appiconset/${file}`,
     size,
     { mode: 'square', fill: 0.58 },
-    // La App Store rechaza iconos con canal alfa.
+    // The App Store rejects icons with an alpha channel.
     false,
   );
 }

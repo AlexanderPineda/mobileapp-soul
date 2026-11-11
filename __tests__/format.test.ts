@@ -23,7 +23,7 @@ describe('formatHour', () => {
   });
 
   it('devuelve el valor original si la hora no es válida', () => {
-    // Antes se pintaba "1:70 PM" o "NaN:undefined AM".
+    // It used to render "1:70 PM" or "NaN:undefined AM".
     expect(formatHour('25:70')).toBe('25:70');
     expect(formatHour('24:00')).toBe('24:00');
     expect(formatHour('sin-hora')).toBe('sin-hora');

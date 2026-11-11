@@ -18,8 +18,8 @@ export function EmptyState({
   return (
     <View style={styles.container}>
       {/*
-        `accessibilityLiveRegion` hace que TalkBack/VoiceOver lean el mensaje
-        cuando aparece tras una carga fallida.
+        `accessibilityLiveRegion` makes TalkBack/VoiceOver read the message out
+        when it appears after a failed load.
       */}
       <Text style={styles.title} accessibilityRole="header" accessibilityLiveRegion="polite">
         {title}
@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
   },
-  // Antes la acción era un `<Text onPress>`: no era un botón para el lector de
-  // pantalla y no llegaba al objetivo táctil mínimo de 44 puntos.
+  // The action used to be a `<Text onPress>`: it was not a button for the screen
+  // reader and did not reach the 44-point minimum touch target.
   action: {
     minHeight: 44,
     justifyContent: 'center',

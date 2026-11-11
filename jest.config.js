@@ -1,12 +1,12 @@
 /**
- * Configuración de Jest.
+ * Jest configuration.
  *
  * `@react-navigation/*`, `react-native-screens`, `react-native-safe-area-context`
- * y `@react-native-picker/picker` se publican como ESM (`lib/module`), así que
- * Jest debe transpilarlos. Sin este `transformIgnorePatterns` la suite falla con
- * `SyntaxError: Unexpected token 'export'` al importar `AppNavigator`.
+ * and `@react-native-picker/picker` ship as ESM (`lib/module`), so Jest has to
+ * transpile them. Without this `transformIgnorePatterns` the suite fails with
+ * `SyntaxError: Unexpected token 'export'` when importing `AppNavigator`.
  *
- * Referencia: https://reactnative.dev/docs/testing-overview
+ * Reference: https://reactnative.dev/docs/testing-overview
  */
 module.exports = {
   preset: '@react-native/jest-preset',

@@ -47,8 +47,8 @@ export function ConfirmationScreen({
   };
 
   const handleDone = () => {
-    // Se limpia todo el stack de reserva: volver atrás ya no es posible ni
-    // deseable después de pagar la cita.
+    // The whole booking stack is cleared: going back is neither possible nor
+    // desirable after paying the appointment.
     navigation.reset({
       index: 0,
       routes: [{ name: 'MainTabs', params: { screen: 'Home' } }],
@@ -57,7 +57,7 @@ export function ConfirmationScreen({
 
   return (
     <View style={styles.container}>
-      {/* Emoji decorativo: oculto para el lector de pantalla. */}
+      {/* Decorative emoji: hidden from the screen reader. */}
       <View
         style={styles.iconRow}
         accessibilityElementsHidden

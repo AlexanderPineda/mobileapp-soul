@@ -11,22 +11,22 @@ import { colors } from '../styles/theme';
 
 const Tab = createBottomTabNavigator<MainTabsParamList>();
 
-/** Altura del contenido de la tab bar, sin el inset del sistema. */
+/** Tab bar content height, without the system inset. */
 const TAB_BAR_HEIGHT = 60;
 
 /**
- * Los iconos se definen fuera del componente para evitar recrearlos en cada
- * render (regla `react/no-unstable-nested-components`).
+ * Icons are defined outside the component to avoid recreating them on every
+ * render (`react/no-unstable-nested-components` rule).
  */
 const homeIcon = () => <TabIcon>🏠</TabIcon>;
 const profileIcon = () => <TabIcon>👤</TabIcon>;
 
 export function MainTabsNavigator() {
   /**
-   * Con edge-to-edge activo (Android 15+ y `edgeToEdgeEnabled=true`) la barra de
-   * navegación del sistema se dibuja encima de la app. Al fijar `height` hay que
-   * sumar el inset inferior a mano; de lo contrario las etiquetas quedan tapadas
-   * en los iPhone con home indicator y en Android con navegación por gestos.
+   * With edge-to-edge on (Android 15+ and `edgeToEdgeEnabled=true`) the system
+   * navigation bar is drawn over the app. When setting a fixed `height` the
+   * bottom inset has to be added by hand; otherwise the labels end up covered on
+   * iPhones with a home indicator and on Android with gesture navigation.
    */
   const insets = useSafeAreaInsets();
   const { t } = useI18n();

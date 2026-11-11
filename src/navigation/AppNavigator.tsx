@@ -50,8 +50,8 @@ export function AppNavigator() {
           component={PaymentScreen}
           options={{
             title: t('payment.screenTitle'),
-            // Mientras se espera la confirmación del pago no hay nada que hacer
-            // atrás: la reserva ya está creada y salir solo confunde.
+            // While waiting for the payment confirmation there is nothing to do
+            // going back: the hold already exists and leaving only confuses.
             headerBackVisible: false,
             gestureEnabled: false,
           }}
@@ -61,7 +61,7 @@ export function AppNavigator() {
           component={ConfirmationScreen}
           options={{
             title: t('confirmation.screenTitle'),
-            // La cita ya está pagada: volver atrás no debe reabrir el formulario.
+            // The appointment is already paid: going back must not reopen the form.
             headerBackVisible: false,
             gestureEnabled: false,
           }}

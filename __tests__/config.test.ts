@@ -6,10 +6,10 @@ import {
 } from '../src/config';
 
 /**
- * La URL del API es la pieza que, si está mal, deja la app inservible sin un solo
- * error de compilación: en un build de release solo se nota al abrir la app.
- * Antes se leía `process.env.UI_API_URL`, que React Native nunca inyecta, así que
- * todo build terminaba apuntando a `localhost`.
+ * The API URL is the piece that, when wrong, leaves the app useless without a
+ * single compilation error: in a release build it is only noticed when opening
+ * the app. It used to read `process.env.UI_API_URL`, which React Native never
+ * injects, so every build ended up pointing at `localhost`.
  */
 describe('configuración por entorno', () => {
   it('en los tests (__DEV__) usa el backend local', () => {

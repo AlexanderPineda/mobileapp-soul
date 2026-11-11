@@ -35,21 +35,21 @@ export function AvailabilityScreen({
   const [serviceTypeIndex, setServiceTypeIndex] = useState(0);
   const [slots, setSlots] = useState<FreeSlot[]>([]);
   /**
-   * `false` cuando el centro no tiene franjas configuradas para ese servicio y
-   * modalidad. Se distingue de "no hay huecos ese día" para no mandar al
-   * paciente a probar días que tampoco tendrán horarios.
+   * `false` when the centre has no slots configured for that service and
+   * modality. It is kept apart from "no openings that day" so the patient is not
+   * sent to try days that will have no slots either.
    */
   const [configured, setConfigured] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * Catálogo desde el backend.
+   * Catalogue from the backend.
    *
-   * Antes había una lista fija de cuatro servicios y uno de ellos no existía en
-   * la base: al pagar, el backend respondía 400 "El servicio seleccionado no
-   * está disponible". Con el catálogo, lo que se ofrece es exactamente lo que se
-   * puede cobrar, y un servicio nuevo aparece sin publicar la app de nuevo.
+   * There used to be a fixed list of four services and one of them did not exist
+   * in the database: on payment the backend answered 400 "The selected service is
+   * not available". With the catalogue, what is offered is exactly what can be
+   * charged, and a new service shows up without republishing the app.
    */
   const loadServices = useCallback(async () => {
     setServicesStatus('loading');
@@ -74,12 +74,12 @@ export function AvailabilityScreen({
   }, [loadServices]);
 
   const serviceType = services[serviceTypeIndex];
-  // La modalidad y la duración dependen del servicio elegido.
+  // Modality and duration depend on the chosen service.
   const modality = serviceType?.modality ?? 'PRESENCIAL';
   const duration = serviceType?.durationMinutes ?? 45;
 
   const loadSlots = useCallback(async () => {
-    // Sin catálogo todavía no hay servicio ni duración que consultar.
+    // Without a catalogue there is no service or duration to query yet.
     if (!serviceType) return;
 
     setLoading(true);
@@ -92,8 +92,8 @@ export function AvailabilityScreen({
         modality,
         staffProfileId: preselectedStaffProfileId,
       });
-      // El backend ya descarta el pasado; se filtra otra vez por si el listado
-      // queda obsoleto mientras la pantalla está abierta.
+      // The backend already drops the past; it is filtered again in case the list
+      // becomes stale while the screen is open.
       const now = new Date();
       setConfigured(result.configured);
       setSlots((result.slots ?? []).filter((slot) => !hasStarted(slot.startTime, now)));
@@ -126,7 +126,7 @@ export function AvailabilityScreen({
     });
   }, [formatDate]);
 
-  /** El precio se muestra porque se cobra antes de confirmar la cita. */
+  /** The price is shown because it is charged before confirming the appointment. */
   const serviceLabelWithPrice = (option: ServiceTypeOption) =>
     `${option.label} · ${formatAmount(option.price, option.currency)}`;
 
@@ -268,8 +268,8 @@ const styles = StyleSheet.create({
   picker: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    // Borde de control (3.03:1). `colors.border` es el hairline decorativo y no
-    // cumple WCAG 1.4.11 sobre las superficies de la app.
+    // Control border (3.03:1). `colors.border` is the decorative hairline and
+    // does not meet WCAG 1.4.11 over the app surfaces.
     borderColor: colors.borderStrong,
     borderRadius: borderRadius.md,
     paddingHorizontal: 12,

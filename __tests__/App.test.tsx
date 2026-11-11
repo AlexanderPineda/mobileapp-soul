@@ -1,11 +1,11 @@
 /**
  * @format
  *
- * Smoke test de la app completa: monta el árbol de navegación y verifica que
- * la pantalla de inicio consulte el endpoint público de centros.
+ * Smoke test of the whole app: it mounts the navigation tree and checks that the
+ * home screen queries the public centres endpoint.
  *
- * La red está mockeada globalmente en `jest.setup.js`: este test no depende de
- * que el backend esté levantado.
+ * The network is mocked globally in `jest.setup.js`: this test does not depend on
+ * the backend being up.
  */
 
 import React from 'react';
@@ -22,7 +22,7 @@ test('monta la navegación y consulta los centros públicos', async () => {
     tree = ReactTestRenderer.create(<App />);
   });
 
-  // Se lee después de `beforeEach`, que es donde `jest.setup.js` instala el mock.
+  // Read after `beforeEach`, which is where `jest.setup.js` installs the mock.
   const fetchMock = global.fetch as unknown as jest.Mock;
 
   expect(tree).toBeDefined();
@@ -32,8 +32,8 @@ test('monta la navegación y consulta los centros públicos', async () => {
     expect.anything(),
   );
 
-  // Desmontar dentro de `act` evita que `react-native-screens` siga programando
-  // trabajo asíncrono cuando el entorno de Jest ya se destruyó.
+  // Unmounting inside `act` stops `react-native-screens` from scheduling
+  // async work once the Jest environment is already torn down.
   await ReactTestRenderer.act(async () => {
     tree!.unmount();
   });

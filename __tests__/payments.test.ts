@@ -9,8 +9,9 @@ import { buildConfirmation } from '../src/utils/confirmation';
 import type { BookingParams, ConfirmationPatient } from '../src/navigation/types';
 
 /**
- * La red está mockeada por test (no por `jest.setup`): aquí importa qué URL y
- * qué cuerpo se envían, porque son los que deciden si el paciente paga o no.
+ * The network is mocked per test (not by `jest.setup`): what matters here is
+ * which URL and which body are sent, because those decide whether the patient
+ * pays or not.
  */
 function mockFetch(body: unknown, status = 200) {
   const fetchMock = jest.fn(() =>
@@ -103,7 +104,7 @@ describe('buildConfirmation', () => {
     found: true,
     status: 'PAID',
     amount: 150000,
-    // El backend enmascara el nombre porque el enlace de retorno se comparte.
+    // The backend masks the name because the return link gets shared.
     patientName: 'Ana G.',
     appointment: {
       id: 'appt-1',
@@ -128,7 +129,7 @@ describe('buildConfirmation', () => {
       isVirtual: true,
       date: '2026-11-12',
       time: '10:00',
-      // El nombre completo lo tiene el cliente; el del backend viene enmascarado.
+      // The client holds the full name; the backend one arrives masked.
       patientName: 'Ana Gómez',
       patientEmail: 'ana@correo.com',
       amount: 150000,

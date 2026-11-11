@@ -14,7 +14,7 @@ import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { buildConfirmation } from '../utils/confirmation';
 import type { ScreenProps } from '../navigation/types';
 
-/** Cada cuánto se pregunta por el pago mientras está pendiente. */
+/** How often the payment is asked about while pending. */
 const POLL_INTERVAL_MS = 4000;
 
 type PaymentState = 'checking' | 'pending' | 'failed' | 'review' | 'not-found';
@@ -22,17 +22,18 @@ type PaymentState = 'checking' | 'pending' | 'failed' | 'review' | 'not-found';
 type Translator = (key: MessageKey) => string;
 
 /**
- * Espera del pago.
+ * Payment wait.
  *
- * La app abre el checkout en el navegador del sistema (`Linking.openURL`), así
- * que no puede saber cuándo termina: Mercado Pago devuelve al paciente a la web
- * (`back_urls` apunta a `FRONTEND_URL`) y desde ahí no hay forma de avisar a la
- * app. La verdad se consulta al backend, que es el único que recibe el webhook:
- * esta pantalla sondea `GET /payments/status/:id` hasta que el pago se resuelve.
+ * The app opens the checkout in the system browser (`Linking.openURL`), so it
+ * cannot know when it ends: Mercado Pago returns the patient to the website
+ * (`back_urls` points at `FRONTEND_URL`) and from there there is no way to
+ * notify the app. The truth is asked to the backend, the only one receiving the
+ * webhook: this screen polls `GET /payments/status/:id` until the payment is
+ * resolved.
  *
- * El sondeo se detiene al desmontar; mientras la pantalla siga montada, el
- * temporizador continúa, que es justo lo que hace falta cuando el paciente
- * vuelve del navegador.
+ * Polling stops on unmount; while the screen stays mounted the timer keeps
+ * going, which is exactly what is needed when the patient comes back from the
+ * browser.
  */
 export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
   const { paymentId, booking, patient } = route.params;
@@ -40,7 +41,7 @@ export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
 
   const [state, setState] = useState<PaymentState>('checking');
   const [error, setError] = useState<string | null>(null);
-  /** Cambiar esta clave reinicia el efecto: es el botón "volver a comprobar". */
+  /** Changing this key restarts the effect: it is the "check again" button. */
   const [attempt, setAttempt] = useState(0);
 
   const goToConfirmation = useCallback(
@@ -52,8 +53,8 @@ export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
         return;
       }
 
-      // Pago aprobado sin cita: el backend la deja en revisión manual. No es un
-      // error y tampoco una confirmación, así que no se inventa una pantalla.
+      // Payment approved without an appointment: the backend leaves it for manual
+      // review. It is neither an error nor a confirmation, so no screen is invented.
       setState('review');
     },
     [booking, navigation, patient],
@@ -94,8 +95,8 @@ export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
       } catch (err: unknown) {
         if (cancelled) return;
 
-        // Un fallo de red no cancela el pago: se avisa y se reintenta, porque el
-        // paciente puede estar volviendo del navegador sin buena señal.
+        // A network failure does not cancel the payment: it is reported and retried,
+        // because the patient may be coming back from the browser with poor signal.
         setError(getErrorMessage(err, t));
         timer = setTimeout(poll, POLL_INTERVAL_MS);
       }
@@ -116,15 +117,15 @@ export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
   };
 
   const retryPayment = () => {
-    // Se reemplaza esta pantalla por el formulario: el backend vuelve a validar
-    // el horario antes de crear una reserva nueva.
+    // This screen is replaced by the form: the backend validates the slot again
+    // before creating a new hold.
     navigation.replace('Booking', booking);
   };
 
   const goHome = async () => {
     if (state === 'failed') {
-      // Best-effort: el pago ya falló, pero esto libera el horario al instante
-      // en lugar de esperar los 15 minutos de la reserva temporal.
+      // Best-effort: the payment already failed, but this frees the slot right away
+      // instead of waiting the 15 minutes of the temporary hold.
       await markPaymentFailed(paymentId).catch(() => undefined);
     }
 
@@ -180,10 +181,10 @@ export function PaymentScreen({ route, navigation }: ScreenProps<'Payment'>) {
 }
 
 /**
- * Textos e icono de cada estado.
+ * Copy and icon of each state.
  *
- * Vive fuera del componente para que el JSX no quede lleno de condicionales; el
- * estado es la única entrada, así que no hay combinaciones raras posibles.
+ * It lives outside the component so the JSX is not full of conditionals; the
+ * state is the only input, so no odd combinations are possible.
  */
 function describeState(
   state: PaymentState,

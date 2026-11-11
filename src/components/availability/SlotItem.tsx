@@ -14,8 +14,8 @@ export function SlotItem({ slot, onSelect }: SlotItemProps) {
   const { t } = useI18n();
   const count = slot.staffProfileIds.length;
 
-  // Dos claves en lugar de pluralización ICU: `es` y `en` solo distinguen
-  // singular y plural en esta frase, y así el diccionario sigue siendo plano.
+  // Two keys instead of ICU pluralisation: `es` and `en` only tell
+  // singular and plural apart in this sentence, and the dictionary stays flat.
   const availability =
     count === 1
       ? t('slots.availableOne')
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    // Borde de control visible (3.03:1): cada tarjeta es pulsable.
+    // Visible control border (3.03:1): every card is tappable.
     borderColor: colors.borderStrong,
     borderRadius: borderRadius.md,
     padding: spacing.md,

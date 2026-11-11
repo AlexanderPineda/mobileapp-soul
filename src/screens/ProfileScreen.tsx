@@ -8,7 +8,7 @@ import { colors, spacing, typography } from '../styles/theme';
 import type { MainTabScreenProps } from '../navigation/types';
 
 export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
-  // Sin header propio: se respetan los insets del sistema en ambos extremos.
+  // No header of its own: the system insets are respected at both ends.
   const insets = useSafeAreaInsets();
   const { t } = useI18n();
 
@@ -19,7 +19,7 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
         { paddingTop: insets.top + spacing.lg, paddingBottom: insets.bottom + spacing.lg },
       ]}
     >
-      {/* Emoji decorativo: oculto para el lector de pantalla. */}
+      {/* Decorative emoji: hidden from the screen reader. */}
       <View
         style={styles.iconRow}
         accessibilityElementsHidden

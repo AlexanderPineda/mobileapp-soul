@@ -1,9 +1,9 @@
 /**
- * App principal de Soul (móvil).
+ * Soul mobile app entry point.
  *
- * Navegación:
- *   - MainTabs: Inicio | Perfil
- *   - Stack anidado: Home -> Terapeutas -> Disponibilidad -> Reserva -> Confirmación
+ * Navigation:
+ *   - MainTabs: Home | Profile
+ *   - Nested stack: Home -> Therapists -> Availability -> Booking -> Confirmation
  */
 
 import React from 'react';
@@ -20,9 +20,10 @@ export default function App() {
       <I18nProvider>
         <SafeAreaProvider>
           {/*
-            El tema es claro (crema/sage): con `light-content` los iconos de la barra
-            de estado quedaban blancos sobre fondo claro e invisibles. En RN 0.87 con
-            edge-to-edge el fondo lo pinta la app, no `backgroundColor`.
+            The theme is light (cream/sage): with `light-content` the status bar
+            icons came out white over a light background and invisible. In RN 0.87
+            with edge-to-edge the background is painted by the app, not by
+            `backgroundColor`.
           */}
           <StatusBar barStyle="dark-content" />
           <AppNavigator />

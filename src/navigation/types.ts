@@ -8,7 +8,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AvailabilityModality } from '../types';
 
 // ================================
-// Listas de parámetros de navegación
+// Navigation param lists
 // ================================
 
 export type MainTabsParamList = {
@@ -16,21 +16,21 @@ export type MainTabsParamList = {
   Profile: undefined;
 };
 
-/** Datos del formulario de reserva. También sirven para reintentar el pago. */
+/** Booking form data. Also used to retry the payment. */
 export interface BookingParams {
   centerId: string;
   modality: AvailabilityModality;
   date: string;
   duration: number;
   time: string;
-  /** Instante exacto del slot en ISO 8601 (UTC), tal como lo devuelve el backend. */
+  /** Exact slot instant in ISO 8601 (UTC), as the backend returns it. */
   startTime: string;
   staffProfileId?: string;
-  /** Valor exacto del servicio que espera el backend (`ServiceType`). */
+  /** Exact service value the backend expects (`ServiceType`). */
   serviceType: string;
-  /** Etiqueta legible del servicio, para mostrar en la pantalla. */
+  /** Human-readable service label, for display. */
   serviceLabel: string;
-  /** Precio del catálogo al momento de reservar (informativo). */
+  /** Catalogue price at booking time (informational). */
   price?: number;
   currency?: string;
   patientName: string;
@@ -40,12 +40,12 @@ export interface BookingParams {
 }
 
 /**
- * Resumen de la cita confirmada.
+ * Summary of the confirmed appointment.
  *
- * No se pasa la cita cruda del backend: con el pago, la cita la crea el webhook
- * y lo único que el cliente conoce es lo que devuelve `/payments/status/:id`
- * (servicio, terapeuta, centro) más los datos que el paciente escribió. Este
- * objeto es la intersección de las dos fuentes.
+ * The raw backend appointment is not passed around: with a payment, the webhook
+ * creates the appointment and all the client knows is what
+ * `/payments/status/:id` returns (service, therapist, centre) plus the data the
+ * patient typed. This object is the intersection of both sources.
  */
 export interface BookingConfirmation {
   appointmentId: string;
@@ -55,25 +55,25 @@ export interface BookingConfirmation {
   therapistName?: string;
   centerName?: string;
   isVirtual: boolean;
-  /** Día del slot en hora local del centro (`YYYY-MM-DD`). */
+  /** Slot day in the centre local time (`YYYY-MM-DD`). */
   date: string;
-  /** Hora del slot en hora local del centro (`HH:MM`). */
+  /** Slot time in the centre local time (`HH:MM`). */
   time: string;
   patientName: string;
   patientEmail: string;
   patientPhone?: string;
-  /** Monto cobrado, cuando el backend lo reporta. */
+  /** Amount charged, when the backend reports it. */
   amount?: number;
   currency?: string;
 }
 
 /**
- * Resumen de la cita confirmada.
+ * Summary of the confirmed appointment.
  *
- * No se pasa la cita cruda del backend: con el pago, la cita la crea el webhook
- * y lo único que el cliente conoce es lo que devuelve `/payments/status/:id`
- * (servicio, terapeuta, centro) más los datos que el paciente escribió. Este
- * objeto es la intersección de las dos fuentes.
+ * The raw backend appointment is not passed around: with a payment, the webhook
+ * creates the appointment and all the client knows is what
+ * `/payments/status/:id` returns (service, therapist, centre) plus the data the
+ * patient typed. This object is the intersection of both sources.
  */
 export interface BookingConfirmation {
   appointmentId: string;
@@ -83,19 +83,19 @@ export interface BookingConfirmation {
   therapistName?: string;
   centerName?: string;
   isVirtual: boolean;
-  /** Día del slot en hora local del centro (`YYYY-MM-DD`). */
+  /** Slot day in the centre local time (`YYYY-MM-DD`). */
   date: string;
-  /** Hora del slot en hora local del centro (`HH:MM`). */
+  /** Slot time in the centre local time (`HH:MM`). */
   time: string;
   patientName: string;
   patientEmail: string;
   patientPhone?: string;
-  /** Monto cobrado, cuando el backend lo reporta. */
+  /** Amount charged, when the backend reports it. */
   amount?: number;
   currency?: string;
 }
 
-/** Datos del paciente que ya están en el formulario al iniciar el pago. */
+/** Patient data already in the form when the payment starts. */
 export interface ConfirmationPatient {
   firstName: string;
   lastName: string;
@@ -108,14 +108,14 @@ export type RootStackParamList = {
   TherapistList: { centerId: string };
   Availability: {
     centerId: string;
-    /** Terapeuta preseleccionado (opcional). */
+    /** Pre-selected therapist (optional). */
     staffProfileId?: string;
   };
   Booking: BookingParams;
   /**
-   * Espera del pago: sondea `GET /payments/status/:id` y decide a dónde ir.
-   * Recibe los datos de la reserva y del paciente para poder reintentar el pago
-   * sin volver a escribir nada.
+   * Payment wait: it polls `GET /payments/status/:id` and decides where to go.
+   * It receives the booking and patient data so the payment can be retried
+   * without typing anything again.
    */
   Payment: {
     paymentId: string;
@@ -129,17 +129,17 @@ export type RootStackParamList = {
 
 
 // ================================
-// Props tipadas para las pantallas
+// Typed props for the screens
 // ================================
 
-/** Pantalla del stack principal (Terapeutas → Reserva → Confirmación). */
+/** Main stack screen (Therapists → Booking → Confirmation). */
 export type ScreenProps<T extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, T>;
 
 /**
- * Pantalla de una pestaña. Se compone con el stack para que `navigate` acepte
- * tanto rutas hermanas de la tab (`Home`, `Profile`) como rutas del stack
- * padre (`TherapistList`, `Availability`, ...).
+ * Tab screen. It is composed with the stack so `navigate` accepts both sibling
+ * tab routes (`Home`, `Profile`) and parent stack routes (`TherapistList`,
+ * `Availability`, ...).
  */
 export type MainTabScreenProps<T extends keyof MainTabsParamList> =
   CompositeScreenProps<

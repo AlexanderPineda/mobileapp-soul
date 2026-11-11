@@ -1,9 +1,9 @@
 import { toServiceOptions } from '../src/utils/service-catalog';
 
 /**
- * El catálogo es la única fuente de nombres y precios: el backend cobra buscando
- * el nombre en `Service` y responde 400 si no existe. Estos tests fijan que la
- * app no vuelva a inventarse un servicio.
+ * The catalogue is the only source of names and prices: the backend charges by
+ * looking the name up in `Service` and answers 400 when it does not exist. These
+ * tests pin that the app does not invent a service again.
  */
 describe('toServiceOptions', () => {
   it('copia nombre, precio y moneda del catálogo', () => {
@@ -28,16 +28,16 @@ describe('toServiceOptions', () => {
       { id: 's2', name: 'Terapia virtual breve', price: 90000, currency: 'COP' },
     ]);
 
-    // No está en las reglas: 45 minutos y virtual porque el nombre lo dice
-    // (misma heurística que `isVirtualService` en `/agendar`).
+    // Not in the rules: 45 minutes and virtual because the name says so
+    // (same heuristic as `isVirtualService` on `/agendar`).
     expect(option.durationMinutes).toBe(45);
     expect(option.modality).toBe('VIRTUAL');
   });
 
   it('cae en presencial cuando el nombre no lo aclara', () => {
-    // Límite conocido: la heurística solo entiende "virtual". Un servicio
-    // llamado "Terapia online" se trataría como presencial hasta que `Service`
-    // guarde la modalidad (ítem 6 del backlog del backend).
+    // Known limit: the heuristic only understands "virtual". A service
+    // named "Terapia online" would be treated as on-site until `Service`
+    // stores the modality (item 6 of the backend backlog).
     const [option] = toServiceOptions([
       { id: 's4', name: 'Terapia online', price: 90000, currency: 'COP' },
     ]);
@@ -54,8 +54,8 @@ describe('toServiceOptions', () => {
       { id: 's3', name: 'Psicoterapia virtual internacional', price: 50, currency: 'USD' },
     ]);
 
-    // Cualquier transformación aquí (minúsculas, trim) haría que el backend no
-    // encuentre el servicio y el pago fallara con 400.
+    // Any transformation here (lowercase, trim) would make the backend miss
+    // the service and the payment would fail with 400.
     expect(option.value).toBe('Psicoterapia virtual internacional');
     expect(option.currency).toBe('USD');
   });

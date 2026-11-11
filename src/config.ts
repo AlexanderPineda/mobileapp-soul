@@ -1,39 +1,39 @@
 import { Platform } from 'react-native';
 
 /**
- * Configuración de la app por entorno.
+ * App configuration per environment.
  *
- * Por qué no se lee `process.env.UI_API_URL`: React Native **no inyecta**
- * variables de entorno en el bundle (no hay dotenv en `babel.config.js`), así
- * que ese valor era siempre `undefined` y la app caía siempre a `localhost`,
- * incluso en un build de release instalado en un teléfono.
+ * Why `process.env.UI_API_URL` is not read: React Native does **not inject**
+ * environment variables into the bundle (there is no dotenv in
+ * `babel.config.js`), so that value was always `undefined` and the app always
+ * fell back to `localhost`, even in a release build installed on a phone.
  *
- * Mientras no exista un entorno de staging, los dos entornos se distinguen con
- * `__DEV__`, que el bundler resuelve en tiempo de build: no depende de ninguna
- * dependencia y no se puede olvidar en un `.env`.
+ * Until a staging environment exists, the two environments are told apart with
+ * `__DEV__`, which the bundler resolves at build time: it depends on no
+ * dependency and cannot be forgotten in a `.env`.
  */
 export type Environment = 'development' | 'production';
 
 /**
- * URL base del API por entorno. Se exporta para poder verificarla en tests y
- * documentarla; la app usa `API_BASE_URL`.
+ * API base URL per environment. Exported so it can be checked in tests and
+ * documented; the app uses `API_BASE_URL`.
  */
 export const API_URLS_BY_ENVIRONMENT: Record<Environment, string> = {
-  // El emulador de Android no ve el `localhost` del host: 10.0.2.2 es su loopback.
+  // The Android emulator cannot see the host `localhost`: 10.0.2.2 is its loopback.
   development: Platform.select({
     android: 'http://10.0.2.2:777/api',
     default: 'http://localhost:777/api',
   }) as string,
-  // Producción: https con certificado válido, así que iOS ATS no necesita
-  // excepciones y Android no necesita permitir tráfico en claro (en release
-  // `usesCleartextTraffic` queda en `false`).
+  // Production: https with a valid certificate, so iOS ATS needs no
+  // exceptions and Android does not need to allow cleartext traffic (in release
+  // `usesCleartextTraffic` stays `false`).
   production: 'https://api.soulrenacecontigo.com/api',
 };
 
-/** Entorno del build actual. `true` en debug, `false` en release. */
+/** Current build environment. `true` in debug, `false` in release. */
 export const environment: Environment = __DEV__ ? 'development' : 'production';
 
 export const API_BASE_URL = API_URLS_BY_ENVIRONMENT[environment];
 
-/** Tiempo máximo de una petición. El sondeo de pagos también lo respeta. */
+/** Request timeout. The payment polling respects it too. */
 export const API_TIMEOUT_MS = 30_000;

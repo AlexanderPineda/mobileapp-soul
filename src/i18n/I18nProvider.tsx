@@ -16,12 +16,12 @@ import { translate, type MessageKey } from './messages';
 
 interface I18nContextValue {
   locale: Locale;
-  /** Cambia el idioma de la app y el que se envía al backend. */
+  /** Changes the app language and the one sent to the backend. */
   setLocale: (locale: Locale) => void;
-  /** Alterna entre los dos idiomas soportados (botón ES/EN). */
+  /** Toggles between the two supported languages (ES/EN button). */
   toggleLocale: () => void;
   t: (key: MessageKey, params?: Record<string, string | number>) => string;
-  /** Fecha larga a partir del día del centro (`YYYY-MM-DD`). */
+  /** Long date from the centre day (`YYYY-MM-DD`). */
   formatLongDate: (isoDate: string) => string;
   formatDate: (date: Date) => string;
   formatAmount: (amount: number, currency?: string) => string;
@@ -30,15 +30,15 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 /**
- * Idioma de la app.
+ * App language.
  *
- * El estado inicial es el del sistema (`detectDeviceLocale`), que también quedó
- * guardado en el store del cliente HTTP: la primera petición de la app ya viaja
- * con el `Accept-Language` correcto, sin esperar a un efecto.
+ * The initial state is the system one (`detectDeviceLocale`), which is also
+ * stored in the HTTP client store: the first app request already travels with
+ * the right `Accept-Language`, without waiting for an effect.
  *
- * El idioma elegido vive solo en memoria: la app no tiene almacenamiento
- * persistente todavía. Al reabrirla vuelve al del teléfono, que es el
- * comportamiento esperado para quien tiene el sistema en su idioma.
+ * The chosen language lives in memory only: the app has no persistent storage
+ * yet. Reopening it goes back to the phone language, which is the expected
+ * behaviour for whoever has the system in their language.
  */
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => getRequestLocale());

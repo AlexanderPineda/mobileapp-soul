@@ -1,28 +1,27 @@
 /**
- * Design tokens de la app móvil.
+ * Design tokens for the mobile app.
  *
- * Referencia: `frontend-soul/src/app/globals.css` (design system Soul).
- * Los tokens marcados "paridad" deben coincidir con el web; lo comprueba
- * `npm run tokens:check`.
+ * Reference: `frontend-soul/src/app/globals.css` (Soul design system).
+ * Tokens marked "parity" must match the web; `npm run tokens:check` enforces it.
  *
- * Nota: el contrato con el web incluye tokens que la app todavía no consume
- * (p. ej. `warning`, `infoBg`, `overlay`). Se mantienen a propósito porque son
- * la fuente de verdad compartida y el script de paridad los compara; borrarlos
- * obligaría a recortar ese contrato y perderíamos el control de deriva.
+ * Note: the contract with the web includes tokens the app does not consume yet
+ * (e.g. `warning`, `infoBg`, `overlay`). They are kept on purpose because they
+ * are the shared source of truth and the parity script compares them; removing
+ * them would mean trimming that contract and losing drift control.
  *
- * Diferencias intencionales con el web (no son deriva):
- * - Sombras: React Native usa `shadowOffset` / `elevation`, no `box-shadow`,
- *   así que los `--elevation-*` del web no son reutilizables tal cual.
- * - Tipografía: el web limita el peso a 600; aquí `h1` usa 700 por legibilidad
- *   en pantalla pequeña. Cambiar a 600 es una decisión de marca pendiente.
- * - Sin `hover`, `focus-visible` ni breakpoints: no existen en RN.
+ * Intentional differences from the web (not drift):
+ * - Shadows: React Native uses `shadowOffset` / `elevation`, not `box-shadow`,
+ *   so the web `--elevation-*` values are not reusable as they are.
+ * - Typography: the web caps the weight at 600; here `h1` uses 700 for
+ *   legibility on small screens. Moving to 600 is a pending brand decision.
+ * - No `hover`, `focus-visible` or breakpoints: they do not exist in RN.
  */
 
 /**
- * Escala de radios alineada con el web, que usa 6/8/12/16/20.
- * Los valores actuales de la app (8/12/16) ya coinciden con `md`/`lg`/`xl`
- * del web, por eso NO se renumeran: renombrarlos apretaría toda la interfaz
- * sin ninguna ganancia visual.
+ * Radius scale aligned with the web, which uses 6/8/12/16/20.
+ * The current app values (8/12/16) already match the web `md`/`lg`/`xl`, which
+ * is why they are NOT renumbered: renaming them would tighten the whole
+ * interface with no visual gain.
  */
 export const borderRadius = {
   xs: 6, // web: --radius-sm
@@ -34,7 +33,7 @@ export const borderRadius = {
 } as const;
 
 export const colors = {
-  // ==================== Marca cruda (idéntica al web) ====================
+  // ==================== Raw brand (identical to the web) ====================
   cream: '#F6F0E8',
   sage: '#DDE6DE',
   sand: '#C4A68E',
@@ -49,21 +48,21 @@ export const colors = {
   surfaceInset: '#F2EEE7', // paridad: --surface-inset
   header: '#DDE6DE', // paridad: --header
 
-  // ==================== Texto ====================
+  // ==================== Text ====================
   text: '#354B5C',
   /**
-   * paridad: --muted-foreground #4D6572 -> 5.42:1 sobre crema.
-   * Antes #7A93A2, que daba 3.06:1 y no cumplía WCAG AA.
+   * parity: --muted-foreground #4D6572 -> 5.42:1 over cream.
+   * It used to be #7A93A2, which gave 3.06:1 and failed WCAG AA.
    */
   textSecondary: '#4D6572',
-  /** Corrige el typo anterior (#F2EEF7 era violáceo). */
+  /** Fixes the previous typo (#F2EEF7 was purplish). */
   muted: '#F2EEE7', // paridad: --muted
 
-  // ==================== Marca / acción ====================
+  // ==================== Brand / action ====================
   primary: '#354B5C',
   primaryLight: '#F6F0E8',
   accent: '#C4A68E',
-  /** paridad: --accent-foreground #2B3D4B -> 4.91:1 sobre arena (antes 3.98:1) */
+  /** parity: --accent-foreground #2B3D4B -> 4.91:1 over sand (previously 3.98:1) */
   accentForeground: '#2B3D4B',
 
   // ==================== Bordes y foco ====================
@@ -72,15 +71,15 @@ export const colors = {
   /** Borde de controles: 3.03:1, cumple WCAG 1.4.11. */
   borderStrong: '#9E8768',
   input: '#9E8768',
-  /** Anillo de foco: 5.70:1 (antes #7A93A2 con 2.84:1). */
+  /** Focus ring: 5.70:1 (previously #7A93A2 at 2.84:1). */
   ring: '#46617A',
 
-  // ==================== Estado ====================
+  // ==================== State ====================
   error: '#94402D',
   destructive: '#94402D',
   destructiveForeground: '#F6F0E8',
   success: '#46614C',
-  /** paridad: --warning #7D5F26 -> 4.82:1 sobre warningBg (antes 4.08:1) */
+  /** parity: --warning #7D5F26 -> 4.82:1 over warningBg (previously 4.08:1) */
   warning: '#7D5F26',
   info: '#4E6A7A',
   successBg: '#DBE7DD',
@@ -89,8 +88,8 @@ export const colors = {
   infoBg: '#DDE7EC',
 
   /**
-   * Capa de modales. Token propio para que no se invierta si algún día cambia
-   * `text` (mismo criterio que el web).
+   * Modal layer. Its own token so it does not invert if `text` ever changes
+   * (same rule as the web).
    */
   overlay: 'rgba(30, 44, 54, 0.55)',
 };
@@ -104,7 +103,7 @@ export const spacing = {
 };
 
 export const typography = {
-  /** Diferencia intencional con el web (600). Ver nota al inicio del archivo. */
+  /** Intentional difference from the web (600). See the note at the top of the file. */
   h1: { fontSize: 24, fontWeight: '700' as const, color: colors.text },
   h2: { fontSize: 20, fontWeight: '600' as const, color: colors.text },
   h3: { fontSize: 16, fontWeight: '600' as const, color: colors.text },

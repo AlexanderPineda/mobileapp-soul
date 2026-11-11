@@ -1,9 +1,9 @@
 /**
- * Helpers de formato (fechas, horas, dinero).
+ * Formatting helpers (dates, times, money).
  *
- * Las fechas aceptan `locale` porque la app y la web comparten datos: el día del
- * centro se envía como `YYYY-MM-DD` y se formatea con `Intl`, así que el mismo
- * valor se lee "viernes, 6 de noviembre de 2026" o "Friday, November 6, 2026".
+ * Dates accept `locale` because the app and the web share data: the centre day is
+ * sent as `YYYY-MM-DD` and formatted with `Intl`, so the same value reads
+ * "Friday, 6 November 2026" or "viernes, 6 de noviembre de 2026".
  */
 
 export function toISODate(date: Date): string {
@@ -14,11 +14,11 @@ export function toISODate(date: Date): string {
 }
 
 /**
- * ¿El instante ISO ya pasó (o es justo ahora)?
+ * Has the ISO instant already passed (or is it right now)?
  *
- * Se usa como guarda de UI: el backend ya no devuelve horarios pasados, pero el
- * listado puede quedar obsoleto si la pantalla lleva rato abierta. Un valor
- * inclasificable se considera pasado para no ofrecer una reserva inválida.
+ * Used as a UI guard: the backend no longer returns past slots, but the list can
+ * go stale when the screen has been open for a while. An unclassifiable value
+ * counts as past, so no invalid booking is offered.
  */
 export function hasStarted(
   isoDateTime: string,
@@ -32,8 +32,8 @@ export function hasStarted(
 export function formatHour(hour: string): string {
   const match = /^(\d{1,2}):(\d{2})$/.exec(hour.trim());
 
-  // Ante un formato inesperado se devuelve el original: mejor mostrar lo que
-  // llegó que inventar algo como "1:70 PM".
+  // On an unexpected format the original is returned: better to show what
+  // arrived than to invent something like "1:70 PM".
   if (!match) return hour;
 
   const hoursNum = Number(match[1]);
@@ -46,8 +46,8 @@ export function formatHour(hour: string): string {
 }
 
 /**
- * Formatea la fecha del slot (YYYY-MM-DD) como texto legible.
- * Se construye a partir de las partes UTC para evitar desfases de zona horaria.
+ * Formats the slot date (YYYY-MM-DD) as readable text.
+ * It is built from the UTC parts to avoid time-zone shifts.
  */
 export function formatLongDate(isoDate: string, locale = 'es-CO'): string {
   const [year, month, day] = isoDate.split('-').map(Number);
@@ -71,12 +71,12 @@ export function formatDate(date: Date, locale = 'es-CO'): string {
 }
 
 /**
- * Monto con la moneda del pago.
+ * Amount with the payment currency.
  *
- * El backend guarda pesos enteros (`Int` en `Payment.amount`), así que se
- * recortan los decimales: "COP 150.000" en lugar de "COP 150.000,00". Si el
- * runtime no soporta `Intl.NumberFormat` con moneda, se devuelve un formato
- * simple en vez de romper la pantalla de confirmación.
+ * The backend stores whole pesos (`Int` in `Payment.amount`), so decimals are
+ * trimmed: "COP 150.000" instead of "COP 150.000,00". If the runtime does not
+ * support `Intl.NumberFormat` with a currency, a simple format is returned
+ * instead of breaking the confirmation screen.
  */
 export function formatAmount(
   amount: number,

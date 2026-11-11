@@ -15,12 +15,12 @@ interface ErrorBoundaryState {
 }
 
 /**
- * Red de seguridad de la app.
+ * App safety net.
  *
- * Sin esto, cualquier excepción durante el render (un `undefined` inesperado en
- * la respuesta del backend, por ejemplo) deja la app en pantalla blanca y sin
- * forma de recuperarse salvo reiniciando. En release el usuario no ve el stack
- * trace, así que se ofrece una acción clara.
+ * Without it, any exception during render (an unexpected `undefined` in the
+ * backend response, for example) leaves the app on a blank screen with no way
+ * back but a restart. In release the user does not see the stack trace, so a
+ * clear action is offered.
  */
 export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    // En producción esto debe llegar a tu servicio de crash reporting.
+    // In production this should reach your crash reporting service.
     console.error('Error no controlado en la app:', error, info.componentStack);
   }
 
@@ -51,9 +51,9 @@ export class ErrorBoundary extends React.Component<
     return (
       <View style={styles.container}>
         {/*
-          Este componente envuelve al `I18nProvider` (si falla el render no hay
-          contexto que leer), así que traduce con la función pura y el idioma que
-          quedó en el store del cliente HTTP.
+          This component wraps `I18nProvider` (if the render fails there is no
+          context to read), so it translates with the pure function and the
+          language left in the HTTP client store.
         */}
         <Text style={styles.title}>
           {translate(getRequestLocale(), 'errorBoundary.title')}

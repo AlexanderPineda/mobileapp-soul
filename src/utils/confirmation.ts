@@ -6,19 +6,20 @@ import type {
 } from '../navigation/types';
 
 /**
- * Arma el resumen que ve el paciente cuando la cita ya existe.
+ * Builds the summary the patient sees once the appointment exists.
  *
- * Dos fuentes se cruzan aquí, y ninguna basta sola:
- * - el backend (`/payments/status/:id`) sabe del servicio, el terapeuta y el
- *   centro que realmente quedaron asignados —puede no ser el terapeuta que el
- *   paciente eligió, porque el backend reasigna al libre con menos citas—;
- * - el cliente sabe el día y la hora de pared del centro, el nombre completo y
- *   el correo tal como los escribió el paciente (`patientName` del backend viene
- *   enmascarado a propósito, porque el enlace de retorno puede compartirse).
+ * Two sources meet here, and neither is enough on its own:
+ * - the backend (`/payments/status/:id`) knows the service, therapist and centre
+ *   that were actually assigned — it may not be the therapist the patient
+ *   picked, because the backend reassigns to the free one with fewer
+ *   appointments;
+ * - the client knows the centre day and wall-clock time, the full name and the
+ *   email as the patient typed them (the backend `patientName` arrives masked on
+ *   purpose, because the return link can be shared).
  *
- * Devuelve `null` cuando el pago no generó cita todavía: el pago puede estar
- * aprobado y la cita en revisión manual, que es un estado real y distinto de un
- * error.
+ * Returns `null` when the payment has not generated an appointment yet: the
+ * payment can be approved with the appointment under manual review, which is a
+ * real state and different from an error.
  */
 export function buildConfirmation(
   booking: BookingParams,
@@ -44,9 +45,10 @@ export function buildConfirmation(
     patientEmail: patient.email,
     patientPhone: patient.phone,
     amount: status.amount,
-    // El estado del pago no devuelve la moneda, y el catálogo sí la conoce: sin
-    // esto, "Psicoterapia virtual internacional" (USD 50) se mostraría como
-    // "COP 50" en la confirmación.
+    // The payment status does not return the currency, and the catalogue does know
+// it: without
+    // this, "Psicoterapia virtual internacional" (USD 50) would show up as
+    // "COP 50" on the confirmation screen.
     currency: booking.currency ?? 'COP',
   };
 }

@@ -99,8 +99,8 @@ export function Button({
       testID={testID}
       activeOpacity={0.8}
       accessibilityRole="button"
-      // Se mantiene el título aunque se muestre el spinner: si no, VoiceOver y
-      // TalkBack anuncian un botón sin nombre mientras se envía el formulario.
+      // The title is kept even while the spinner shows: otherwise VoiceOver and
+      // TalkBack announce a nameless button while the form is submitted.
       accessibilityLabel={title}
       accessibilityState={{ disabled: isDisabled, busy: Boolean(loading) }}
     >
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 2,
   },
-  /** Sin esto un botón deshabilitado se ve exactamente igual que uno activo. */
+  /** Without this a disabled button looks exactly like an active one. */
   disabled: { opacity: 0.6 },
   text: {
     fontSize: 15,

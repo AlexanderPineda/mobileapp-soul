@@ -21,7 +21,7 @@ export function CenterCard({ center, onSelect }: CenterCardProps) {
       accessibilityLabel={t('centers.cardLabel', { center: center.name })}
       accessibilityHint={t('centers.cardHint')}
     >
-      {/* Emoji decorativo: se oculta para que el lector no lea "marcador". */}
+      {/* Decorative emoji: hidden so the reader does not say "pin". */}
       <View
         style={styles.iconRow}
         accessibilityElementsHidden

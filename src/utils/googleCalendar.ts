@@ -1,25 +1,25 @@
 /**
- * Utilidad para generar enlaces "Agregar a Google Calendar".
- * Usa la URL pública de Google Calendar (action=TEMPLATE), sin OAuth.
- * Referencia: https://calendar.google.com/calendar/render?action=TEMPLATE
+ * Helper to build "Add to Google Calendar" links.
+ * It uses the public Google Calendar URL (action=TEMPLATE), no OAuth.
+ * Reference: https://calendar.google.com/calendar/render?action=TEMPLATE
  */
 
 export interface GoogleCalendarEventInput {
-  /** Título del evento */
+  /** Event title */
   title: string;
-  /** Fecha/hora de inicio en formato ISO 8601 */
+  /** Start date/time in ISO 8601 format */
   startTime: string;
-  /** Fecha/hora de fin en formato ISO 8601 */
+  /** End date/time in ISO 8601 format */
   endTime: string;
-  /** Detalle/descripción del evento */
+  /** Event details/description */
   description?: string;
-  /** Ubicación (no usar para sesiones virtuales) */
+  /** Location (do not use for virtual sessions) */
   location?: string;
 }
 
 /**
- * Convierte una fecha ISO a formato UTC de Google: yyyyMMddTHHmmssZ
- * Ejemplo: 2026-10-20T15:30:00.000Z -> 20261020T153000Z
+ * Converts an ISO date to the Google UTC format: yyyyMMddTHHmmssZ
+ * Example: 2026-10-20T15:30:00.000Z -> 20261020T153000Z
  */
 function toGoogleUtcDate(isoDate: string): string {
   return new Date(isoDate)
@@ -29,7 +29,7 @@ function toGoogleUtcDate(isoDate: string): string {
 }
 
 /**
- * Construye la URL de Google Calendar con el evento prellenado.
+ * Builds the Google Calendar URL with the event pre-filled.
  */
 export function buildGoogleCalendarUrl(event: GoogleCalendarEventInput): string {
   const params: string[] = [

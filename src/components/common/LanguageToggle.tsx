@@ -5,12 +5,12 @@ import { useI18n } from '../../i18n/I18nProvider';
 import { borderRadius, colors, spacing } from '../../styles/theme';
 
 /**
- * Botón ES/EN.
+ * ES/EN button.
  *
- * La app no tiene menú de ajustes: el idioma se cambia donde el paciente lo
- * necesita, en la primera pantalla, igual que el selector de `/agendar` en el
- * web. El objetivo táctil es de 44 puntos (WCAG 2.5.5) y el estado se anuncia
- * con `accessibilityLabel`, no solo con el texto "ES".
+ * The app has no settings menu: the language is changed where the patient needs
+ * it, on the first screen, just like the `/agendar` selector on the web. The
+ * touch target is 44 points (WCAG 2.5.5) and the state is announced with
+ * `accessibilityLabel`, not just with the "ES" text.
  */
 export function LanguageToggle() {
   const { locale, toggleLocale, t } = useI18n();

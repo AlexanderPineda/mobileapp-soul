@@ -29,7 +29,7 @@ export function TherapistCard({ therapist, onSelect }: TherapistCardProps) {
       accessibilityHint={t('therapists.cardHint')}
     >
       <View style={styles.avatarRow}>
-        {/* El avatar es decorativo: el nombre ya va en la etiqueta. */}
+        {/* The avatar is decorative: the name is already in the label. */}
         <View
           style={styles.avatar}
           accessibilityElementsHidden
