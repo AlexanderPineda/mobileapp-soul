@@ -75,7 +75,7 @@ export function AvailabilityScreen({
 
   const serviceType = services[serviceTypeIndex];
   // Modality and duration depend on the chosen service.
-  const modality = serviceType?.modality ?? 'PRESENCIAL';
+  const modality = serviceType?.modality ?? 'IN_PERSON';
   const duration = serviceType?.durationMinutes ?? 45;
 
   const loadSlots = useCallback(async () => {

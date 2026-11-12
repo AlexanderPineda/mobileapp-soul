@@ -16,7 +16,7 @@ describe('toServiceOptions', () => {
         value: 'Terapia Familiar',
         label: 'Terapia Familiar',
         durationMinutes: 60,
-        modality: 'PRESENCIAL',
+        modality: 'IN_PERSON',
         price: 160000,
         currency: 'COP',
       },
@@ -76,7 +76,7 @@ describe('toServiceOptions', () => {
 
     // Legacy fallback only: the dashboard value is what counts, and this
     // payload does not carry one.
-    expect(option.modality).toBe('PRESENCIAL');
+    expect(option.modality).toBe('IN_PERSON');
   });
 
   it('no ofrece servicios cuando el catálogo viene vacío', () => {

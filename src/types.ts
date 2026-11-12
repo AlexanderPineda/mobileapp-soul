@@ -2,7 +2,7 @@
 // Tipos compartidos de la app Soul
 // ================================
 
-export type AvailabilityModality = 'VIRTUAL' | 'PRESENCIAL';
+export type AvailabilityModality = 'VIRTUAL' | 'IN_PERSON';
 
 /** Catalogue service (`GET /services/active`). */
 export interface CatalogService {

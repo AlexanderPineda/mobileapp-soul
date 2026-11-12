@@ -15,12 +15,12 @@ const SERVICE_RULES: Record<
   string,
   { durationMinutes: number; modality: AvailabilityModality }
 > = {
-  'Terapia Familiar': { durationMinutes: 60, modality: 'PRESENCIAL' },
-  'Terapia de pareja': { durationMinutes: 60, modality: 'PRESENCIAL' },
-  'Valoracion inicial': { durationMinutes: 90, modality: 'PRESENCIAL' },
-  'Valoración inicial': { durationMinutes: 90, modality: 'PRESENCIAL' },
+  'Terapia Familiar': { durationMinutes: 60, modality: 'IN_PERSON' },
+  'Terapia de pareja': { durationMinutes: 60, modality: 'IN_PERSON' },
+  'Valoracion inicial': { durationMinutes: 90, modality: 'IN_PERSON' },
+  'Valoración inicial': { durationMinutes: 90, modality: 'IN_PERSON' },
   'Terapia individual virtual': { durationMinutes: 45, modality: 'VIRTUAL' },
-  'Terapia individual presencial': { durationMinutes: 45, modality: 'PRESENCIAL' },
+  'Terapia individual presencial': { durationMinutes: 45, modality: 'IN_PERSON' },
   'Psicoterapia virtual internacional': {
     durationMinutes: 45,
     modality: 'VIRTUAL',
@@ -48,7 +48,7 @@ export function toServiceOptions(
     const modality: AvailabilityModality =
       service.modality ??
       rule?.modality ??
-      (service.name.toLowerCase().includes('virtual') ? 'VIRTUAL' : 'PRESENCIAL');
+      (service.name.toLowerCase().includes('virtual') ? 'VIRTUAL' : 'IN_PERSON');
 
     return {
       // The name is the key: `create-preference` looks it up in the catalogue and
