@@ -12,6 +12,10 @@ export interface CatalogService {
   /** Price in the smallest unit of `currency` (whole pesos). */
   price: number;
   currency: string;
+  /** Session length in minutes, set from the dashboard. */
+  durationMinutes?: number;
+  /** Modality the service is sold in, set from the dashboard. */
+  modality?: AvailabilityModality;
 }
 
 /** Service picker option, with everything the flow needs. */

@@ -29,19 +29,53 @@ describe('toServiceOptions', () => {
     ]);
 
     // Not in the rules: 45 minutes and virtual because the name says so
-    // (same heuristic as `isVirtualService` on `/agendar`).
+    // (same heuristic as `/agendar`, kept only for a catalogue without the
+    // duration/modality columns).
     expect(option.durationMinutes).toBe(45);
     expect(option.modality).toBe('VIRTUAL');
   });
 
-  it('cae en presencial cuando el nombre no lo aclara', () => {
-    // Known limit: the heuristic only understands "virtual". A service
-    // named "Terapia online" would be treated as on-site until `Service`
-    // stores the modality (item 6 of the backend backlog).
+  it('toma duración y modalidad del catálogo, no del nombre', () => {
+    const [option] = toServiceOptions([
+      {
+        id: 's5',
+        name: 'Terapia online para expatriados',
+        price: 150000,
+        currency: 'COP',
+        durationMinutes: 50,
+        modality: 'VIRTUAL',
+      },
+    ]);
+
+    // The dashboard decides: a new service arrives with its own values even
+    // though the name is not in `SERVICE_RULES`.
+    expect(option.durationMinutes).toBe(50);
+    expect(option.modality).toBe('VIRTUAL');
+  });
+
+  it('el catálogo manda sobre la tabla heredada', () => {
+    const [option] = toServiceOptions([
+      {
+        id: 's6',
+        name: 'Terapia Familiar',
+        price: 160000,
+        currency: 'COP',
+        durationMinutes: 90,
+        modality: 'VIRTUAL',
+      },
+    ]);
+
+    expect(option.durationMinutes).toBe(90);
+    expect(option.modality).toBe('VIRTUAL');
+  });
+
+  it('cae en presencial cuando ni el catálogo ni el nombre lo aclaran', () => {
     const [option] = toServiceOptions([
       { id: 's4', name: 'Terapia online', price: 90000, currency: 'COP' },
     ]);
 
+    // Legacy fallback only: the dashboard value is what counts, and this
+    // payload does not carry one.
     expect(option.modality).toBe('PRESENCIAL');
   });
 

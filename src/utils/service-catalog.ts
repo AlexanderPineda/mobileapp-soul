@@ -5,13 +5,11 @@ import type {
 } from '../types';
 
 /**
- * Duration and modality per service name.
+ * What the catalogue does not send, for the services the product shipped with.
  *
- * `Service` **does not store** `durationMinutes` or the modality yet (it is item 6
- * of the backend backlog), so these two values still live in the client. The
- * difference from before is where the name and price come from: the catalogue
- * (`GET /services/active`), which is the only thing the backend validates when
- * charging. This table only adds what the backend does not model.
+ * `Service` now stores `durationMinutes` and `modality` (set from the dashboard),
+ * so this table only covers a backend that has not deployed that change yet;
+ * the value from the API always wins.
  */
 const SERVICE_RULES: Record<
   string,
@@ -29,24 +27,26 @@ const SERVICE_RULES: Record<
   },
 };
 
-/** Default duration when the service is not in the table (same as the web). */
+/** Default duration when neither the API nor the table has a value. */
 const FALLBACK_DURATION_MINUTES = 45;
 
 /**
  * Turns the catalogue into options for the picker.
  *
- * A service created from the dashboard shows up in the app without touching
- * code. When it is not in `SERVICE_RULES` the same heuristic as `/agendar` is
- * used: 45 minutes and "virtual" in the name ⇒ virtual; otherwise on-site. It is
- * a heuristic, which is why the price is never inferred: it comes from the
- * catalogue.
+ * Duration and modality come from the service row (`durationMinutes`,
+ * `modality`): the dashboard is the single place that decides them, so a
+ * service created there shows up in the app without touching code. `SERVICE_RULES`
+ * and the "virtual" substring are only the legacy fallback for a service the API
+ * does not describe. The price is never inferred: it always comes from the
+ * catalogue, which is what the backend validates when charging.
  */
 export function toServiceOptions(
   services: CatalogService[],
 ): ServiceTypeOption[] {
   return services.map((service) => {
     const rule = SERVICE_RULES[service.name];
-    const modality =
+    const modality: AvailabilityModality =
+      service.modality ??
       rule?.modality ??
       (service.name.toLowerCase().includes('virtual') ? 'VIRTUAL' : 'PRESENCIAL');
 
@@ -55,7 +55,10 @@ export function toServiceOptions(
       // answers 400 when it does not exist or is inactive.
       value: service.name,
       label: service.name,
-      durationMinutes: rule?.durationMinutes ?? FALLBACK_DURATION_MINUTES,
+      durationMinutes:
+        service.durationMinutes ??
+        rule?.durationMinutes ??
+        FALLBACK_DURATION_MINUTES,
       modality,
       price: service.price,
       currency: service.currency,
